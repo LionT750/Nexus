@@ -1,5 +1,11 @@
 package com.nexus.backend.dtos;
 
-public class ProdutoCriarResponse {
-    
-}
+import java.math.BigDecimal;
+
+public record ProdutoCriarResponse(
+    Long id,
+    String nome,
+    String descricao,
+    Long estoque,
+    BigDecimal preco) 
+{}
