@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController 
 @RequestMapping("/clientes")
 @RequiredArgsConstructor 
-public class ClienteController {
+public class ClienteRestController {
     private final ClienteService clienteService;
 
     @PostMapping
