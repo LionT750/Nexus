@@ -3,12 +3,13 @@ spring:
         name: backend-nexus
 
     datasource:
-        url: jdbc:postgresql://localhost:5432/nexus
+        url: jdbc:postgresql://localhost:5432/Nexus
         username: postgres
         password: 123
         driver-class-name: org.postgresql.Driver
 
     jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
         show-sql: true
