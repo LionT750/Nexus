@@ -33,8 +33,4 @@ public class ProdutoRestController {
     public List<ProdutoListarResponse> listarClientes() {
         return produtoService.listar();
     }
-    
-    
-
-
 }

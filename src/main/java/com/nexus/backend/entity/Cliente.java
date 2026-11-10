@@ -1,9 +1,10 @@
 package com.nexus.backend.entity;
 
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.br.CPF;
+import java.math.BigDecimal;
 
-import com.nexus.backend.enums.ClienteCategoria;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.br.CNPJ;
+import com.nexus.backend.enums.ClienteClassificao;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,8 +37,8 @@ public class Cliente {
     @Length(min = 3, max = 60)
     private String name;
 
-    @CPF
-    private String cpf;
+    @CNPJ 
+    private String cnpj;
 
     private String telefone;
 
@@ -44,6 +46,9 @@ public class Cliente {
     @Email
     private String email;
 
+    @Min(0)
+    private BigDecimal limiteDeCredito;
+
     @Enumerated(EnumType.STRING)
-    private ClienteCategoria categoria;
+    private ClienteClassificao classificacao;
 }

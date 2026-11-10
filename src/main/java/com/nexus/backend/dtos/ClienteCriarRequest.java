@@ -1,12 +1,15 @@
 package com.nexus.backend.dtos;
 
-import com.nexus.backend.enums.ClienteCategoria;
+import java.math.BigDecimal;
+
+import com.nexus.backend.enums.ClienteClassificao;
 
 public record ClienteCriarRequest(
     String name,
     String telefone,
-    String cpf,
+    String cnpj,
     String email,
-    ClienteCategoria categoria
+    BigDecimal limiteDeCredito,
+    ClienteClassificao classificacao
 ) 
 {}

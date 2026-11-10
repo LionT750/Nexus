@@ -1,6 +1,6 @@
 package com.nexus.backend.enums;
 
-public enum ClienteCategoria {
+public enum ClienteClassificao{
     NORMAL,
     VIP
 }
