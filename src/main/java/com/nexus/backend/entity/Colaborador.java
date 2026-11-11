@@ -2,7 +2,6 @@ package com.nexus.backend.entity;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CPF;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
