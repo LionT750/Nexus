@@ -25,7 +25,7 @@ public class PedidoRestController {
     private final PedidoService pedidoService;
 
     @PostMapping
-    public PedidoCriarResponse criarCliente(@Valid @RequestBody PedidoCriarRequest pedido) {
+    public PedidoCriarResponse criarPedido(@Valid @RequestBody PedidoCriarRequest pedido) {
         return pedidoService.criar(pedido);
     }
 
