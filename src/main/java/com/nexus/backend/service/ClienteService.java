@@ -8,6 +8,7 @@ import com.nexus.backend.dtos.ClienteCriarRequest;
 import com.nexus.backend.dtos.ClienteCriarResponse;
 import com.nexus.backend.dtos.ClienteListarResponse;
 import com.nexus.backend.entity.Cliente;
+import com.nexus.backend.exceptions.ClienteAlreadyCadastradoException;
 import com.nexus.backend.mappers.ClienteMapper;
 import com.nexus.backend.repository.ClienteRepository;
 
@@ -20,6 +21,10 @@ public class ClienteService {
     private final ClienteMapper clienteMapper;
 
     public ClienteCriarResponse criar(ClienteCriarRequest novoCliente) {
+        
+        if (clienteRepository.existsByCnpj(novoCliente.cnpj()))
+            throw new ClienteAlreadyCadastradoException(novoCliente.cnpj());
+
         Cliente cliente = clienteMapper.toEntity(novoCliente);
         Cliente persistedCliente = clienteRepository.save(cliente);
         return clienteMapper.toDTO(persistedCliente);
