@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusPedido;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,12 +21,14 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 
 @AllArgsConstructor 
 @NoArgsConstructor 
 @Getter 
+@Setter
 @Builder 
 @Entity
 public class Pedido {
@@ -34,11 +38,6 @@ public class Pedido {
     private Long id;
 
     private String descricao;
-
-    @ManyToOne
-    private Cliente cliente;
-
-    @ManyToOne Colaborador colaborador;
 
     @Min(0)
     private BigDecimal valorTotal;
@@ -51,9 +50,34 @@ public class Pedido {
     @Enumerated (EnumType.STRING)
     private StatusPedido statusPedido;
 
-    @OneToMany (mappedBy = "id")
-    private List<Produto> produto;
+    private ModalidadePagamento modalidadePagamento;
 
+    @ManyToOne(cascade =  CascadeType.ALL)
+    private Cliente cliente;
+
+    @ManyToOne (cascade =  CascadeType.ALL) 
+    Colaborador colaborador;
+
+    @OneToMany (mappedBy = "id", cascade = CascadeType.ALL)
+    private List<ItemPedido> itemsPedido;
+
+
+    public void adicionarItem(ItemPedido itemPedido) {
+        itemsPedido.add(itemPedido);
+        return;
+    }
+
+    public void calcularEsetarValorTotal(BigDecimal descontoEmDecimal) {
+        valorTotal =  BigDecimal.ZERO;
+
+        for (ItemPedido i : itemsPedido){
+            valorTotal = valorTotal.add(i.getValorItem().multiply(i.getQuantidade()));
+        }
+
+        valorTotal = valorTotal.multiply((BigDecimal.ONE.subtract(descontoEmDecimal)));
+        setValorTotal(valorTotal);
+
+    }
     
 }
 
