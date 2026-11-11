@@ -6,15 +6,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @AllArgsConstructor 
 @NoArgsConstructor 
-@Getter 
+@Getter
+@Setter 
 @Builder 
 @Entity
 public class ItemPedido {
@@ -26,12 +29,16 @@ public class ItemPedido {
     @ManyToOne 
     private Produto produto;
 
-    private BigDecimal quantidade;
+    @ManyToOne 
+    private Pedido pedido;
+
+    @Min(0)
+    private Long quantidade;
 
     private BigDecimal valorItem;
 
     public void calcularValorItem(){
-        valorItem = produto.getPreco().multiply(quantidade);
+        valorItem = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
     }
     
 }

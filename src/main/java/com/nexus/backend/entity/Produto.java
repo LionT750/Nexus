@@ -46,7 +46,7 @@ public class Produto {
 
 
     public void baixarEstoque(Long quantidadeParaBaixar){
-        if (quantidadeParaBaixar - estoque < 0)
+        if (estoque - quantidadeParaBaixar < 0)
             throw new EstoqueInsuficienteException(estoque, quantidadeParaBaixar);
 
         estoque -= quantidadeParaBaixar;

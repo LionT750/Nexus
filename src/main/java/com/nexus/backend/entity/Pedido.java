@@ -1,5 +1,6 @@
 package com.nexus.backend.entity;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -50,15 +51,16 @@ public class Pedido {
     @Enumerated (EnumType.STRING)
     private StatusPedido statusPedido;
 
+    @Enumerated (EnumType.STRING)
     private ModalidadePagamento modalidadePagamento;
 
-    @ManyToOne(cascade =  CascadeType.ALL)
+    @ManyToOne
     private Cliente cliente;
 
-    @ManyToOne (cascade =  CascadeType.ALL) 
+    @ManyToOne 
     Colaborador colaborador;
 
-    @OneToMany (mappedBy = "id", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itemsPedido;
 
 
@@ -71,10 +73,10 @@ public class Pedido {
         valorTotal =  BigDecimal.ZERO;
 
         for (ItemPedido i : itemsPedido){
-            valorTotal = valorTotal.add(i.getValorItem().multiply(i.getQuantidade()));
+            valorTotal = valorTotal.add(i.getValorItem());
         }
 
-        valorTotal = valorTotal.multiply((BigDecimal.ONE.subtract(descontoEmDecimal)));
+        valorTotal = valorTotal.multiply((BigDecimal.ONE.subtract(descontoEmDecimal))).setScale(2, RoundingMode.HALF_UP);
         setValorTotal(valorTotal);
 
     }
