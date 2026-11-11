@@ -28,6 +28,7 @@ public class Colaborador {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column (nullable = false, unique = true)
     @Length(min = 3, max = 60)
     private String name;
 

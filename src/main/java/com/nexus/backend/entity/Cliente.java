@@ -37,7 +37,8 @@ public class Cliente {
     @Length(min = 3, max = 60)
     private String name;
 
-    @CNPJ 
+    @CNPJ(format = CNPJ.Format.ALPHANUMERIC) 
+    @Column (nullable = false, unique = true)
     private String cnpj;
 
     private String telefone;
