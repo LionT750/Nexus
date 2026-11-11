@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ClienteCriarRequest(
-    @NotBlank @Length(min= 3) String name,
+    @NotBlank @Length(min= 3, max=60) String name,
     String telefone,
     @CNPJ(format = CNPJ.Format.ALPHANUMERIC) @NotNull String cnpj,
     @Email @NotNull String email,
