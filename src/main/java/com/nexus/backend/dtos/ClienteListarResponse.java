@@ -6,7 +6,7 @@ public record ClienteListarResponse(
     String name,
     String telefone,
     String email,
-    ClienteClassificao categoria
+    ClienteClassificao classificacao
 ) 
 
 {}

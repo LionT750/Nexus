@@ -6,6 +6,6 @@ public record ClienteCriarResponse(
     Long id,
     String name,
     String email,
-    ClienteClassificao categoria) 
+    ClienteClassificao classificacao) 
 {
 }
