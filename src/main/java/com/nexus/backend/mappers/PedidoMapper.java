@@ -13,10 +13,23 @@ import com.nexus.backend.entity.Pedido;
 @Mapper (componentModel = "spring")
 public interface PedidoMapper{
     
+    @Mapping (target = "id", ignore = true)
+    @Mapping (target = "dataCriacao", ignore = true)
+    @Mapping (target = "statusPedido", ignore = true)
+    @Mapping (target = "cliente", ignore = true)
+    @Mapping (target = "colaborador", ignore = true)
+    @Mapping (target = "itemsPedido", ignore = true)
+    @Mapping( target = "valorTotal", ignore = true)
     Pedido toEntity(PedidoCriarRequest dto);
     
+    @Mapping (source = "id", target = "codigoPedido")
+    @Mapping (source = "cliente.name", target = "nomeCliente")
     PedidoCriarResponse toDTO(Pedido  pedido);
     
+    @Mapping (source = "id", target = "codigoPedido")
+    @Mapping (source = "cliente.name", target = "nomeCliente")
+    PedidoListarResponse toListarDTO(Pedido pedido);
+
     List<PedidoListarResponse> toDTO(List<Pedido > pedidos);
 }
 
