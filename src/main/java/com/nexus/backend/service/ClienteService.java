@@ -9,6 +9,7 @@ import com.nexus.backend.dtos.ClienteCriarResponse;
 import com.nexus.backend.dtos.ClienteListarResponse;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.exceptions.ClienteAlreadyCadastradoException;
+import com.nexus.backend.exceptions.EmailJaCadastradoException;
 import com.nexus.backend.mappers.ClienteMapper;
 import com.nexus.backend.repository.ClienteRepository;
 
@@ -22,6 +23,9 @@ public class ClienteService {
 
     public ClienteCriarResponse criar(ClienteCriarRequest novoCliente) {
         
+        if (clienteRepository.existsByEmail(novoCliente.email()))
+            throw new EmailJaCadastradoException(novoCliente.email());
+
         if (clienteRepository.existsByCnpj(novoCliente.cnpj()))
             throw new ClienteAlreadyCadastradoException(novoCliente.cnpj());
 

@@ -11,4 +11,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long>{
     boolean existsByCnpj(String cnpj);
 
     Optional<Cliente> findByCnpj(String cnpj);
+
+    boolean existsByEmail(String email);
 }
