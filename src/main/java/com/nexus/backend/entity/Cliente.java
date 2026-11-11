@@ -36,7 +36,7 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Length(min = 3, max = 60)
+    @Length(min = 3, max = 60, message = "O nome deve ter entre 3 até 60 caracteres")
     private String name;
 
     @CNPJ(format = CNPJ.Format.ALPHANUMERIC) 
