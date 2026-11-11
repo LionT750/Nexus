@@ -1,6 +1,9 @@
 package com.nexus.backend.entity;
 
 import java.math.BigDecimal;
+
+import org.hibernate.annotations.SoftDelete;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +23,7 @@ import lombok.Setter;
 @Setter 
 @Builder 
 @Entity
+@SoftDelete (columnName = "excluido")
 public class ItemPedido {
 
     @Id 

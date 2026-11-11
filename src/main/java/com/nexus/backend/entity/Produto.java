@@ -2,6 +2,8 @@ package com.nexus.backend.entity;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.SoftDelete;
+
 import com.nexus.backend.enums.StatusProduto;
 import com.nexus.backend.exceptions.EstoqueInsuficienteException;
 
@@ -24,6 +26,7 @@ import lombok.NoArgsConstructor;
 @Getter 
 @Builder 
 @Entity
+@SoftDelete (columnName = "excluido")
 public class Produto {
 
     @Id 

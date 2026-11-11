@@ -2,6 +2,7 @@ package com.nexus.backend.entity;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.SoftDelete;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CNPJ;
 import com.nexus.backend.enums.ClienteClassificao;
@@ -27,6 +28,7 @@ import lombok.Setter;
 @Setter 
 @Builder 
 @Entity
+@SoftDelete (columnName = "excluido")
 public class Cliente {
     
 

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SoftDelete;
 
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusPedido;
@@ -32,6 +33,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @Builder 
 @Entity
+@SoftDelete (columnName = "excluido")
 public class Pedido {
 
     @Id 
