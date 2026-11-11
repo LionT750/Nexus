@@ -30,6 +30,6 @@ public interface PedidoMapper{
     @Mapping (source = "cliente.name", target = "nomeCliente")
     PedidoListarResponse toListarDTO(Pedido pedido);
 
-    List<PedidoListarResponse> toDTO(List<Pedido > pedidos);
+    List<PedidoListarResponse> toListarDTO(List<Pedido> pedidos);
 }
 

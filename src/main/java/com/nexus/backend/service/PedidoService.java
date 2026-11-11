@@ -1,6 +1,7 @@
 package com.nexus.backend.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,15 +22,15 @@ import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Pedido;
 import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.ClienteClassificao;
+import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusPedido;
+import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
-import com.nexus.backend.mappers.ItemPedidoMapper;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
 import com.nexus.backend.repository.ColaboradorRepository;
-import com.nexus.backend.repository.ItemPedidoRepository;
 import com.nexus.backend.repository.PedidoRepository;
 import com.nexus.backend.repository.ProdutoRepository;
 
@@ -60,11 +61,14 @@ public class PedidoService {
 
             pedido.setItemsPedido(itensPedidos);
             pedido.setModalidadePagamento(novoPedido.modalidadePagamento());
-            pedido.setStatusPedido(StatusPedido.DISPONIVEL);
+            pedido.setStatusPedido(StatusPedido.PENDENTE);
             
             BigDecimal desconto = validarQualMelhorDescontoProCliente(cliente, novoPedido);
 
             pedido.calcularEsetarValorTotal(desconto);
+
+            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO && pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+                throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
 
             return pedidoMapper.toDTO(pedidoRepository.save(pedido));
              
@@ -72,7 +76,11 @@ public class PedidoService {
 
     public List<PedidoListarResponse> listar(){
         List<Pedido> pedidos = pedidoRepository.findAll();
-        return pedidoMapper.toDTO(pedidos);
+        return pedidoMapper.toListarDTO(pedidos);
+    }
+
+    public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
+        return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatus(LocalDateTime.now(), StatusPedido.PENDENTE));
     }
 
 

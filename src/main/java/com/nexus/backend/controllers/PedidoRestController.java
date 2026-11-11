@@ -18,6 +18,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
+
 @RestController 
 @RequestMapping("/pedidos")
 @RequiredArgsConstructor 
@@ -32,6 +33,11 @@ public class PedidoRestController {
     @GetMapping
     public List<PedidoListarResponse> listarPedidos() {
         return pedidoService.listar();
+    }
+    
+    @GetMapping("/vencidosEmAberto")
+    public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
+        return pedidoService.listarPedidosVencidosEmAberto();
     }
     
     
