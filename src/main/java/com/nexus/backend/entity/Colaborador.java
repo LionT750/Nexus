@@ -1,5 +1,6 @@
 package com.nexus.backend.entity;
 
+import org.hibernate.annotations.SoftDelete;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CPF;
 
@@ -21,6 +22,7 @@ import lombok.Setter;
 @Setter 
 @Builder 
 @Entity
+@SoftDelete (columnName = "excluido")
 public class Colaborador {
     
 
