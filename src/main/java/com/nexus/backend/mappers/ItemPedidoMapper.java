@@ -16,6 +16,7 @@ import com.nexus.backend.entity.ItemPedido;
     @Mapping (target = "id", ignore = true)
     @Mapping (target = "produto", ignore = true)
     @Mapping (target = "valorItem", ignore = true)
+    @Mapping( target = "pedido", ignore = true)
     ItemPedido toEntity(ItemPedidoCriarRequest dto);
 
     List<ItemPedido> toEntityList(List<ItemPedidoCriarRequest> itensPedidoDto);
