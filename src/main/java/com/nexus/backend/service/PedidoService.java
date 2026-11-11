@@ -1,10 +1,17 @@
 package com.nexus.backend.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
@@ -12,18 +19,20 @@ import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Pedido;
+import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.ClienteClassificao;
 import com.nexus.backend.enums.StatusPedido;
-import com.nexus.backend.exceptions.ColaboradorOuClienteNotFoundException;
-import com.nexus.backend.mappers.ColaboradorMapper;
+import com.nexus.backend.exceptions.ClienteNotFoundException;
+import com.nexus.backend.exceptions.ColaboradorNotFoundException;
+import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.mappers.ItemPedidoMapper;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
 import com.nexus.backend.repository.ColaboradorRepository;
+import com.nexus.backend.repository.ItemPedidoRepository;
 import com.nexus.backend.repository.PedidoRepository;
 import com.nexus.backend.repository.ProdutoRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor 
@@ -34,27 +43,22 @@ public class PedidoService {
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
     private final PedidoMapper pedidoMapper;
-    private final ItemPedidoMapper itemPedidoMapper;
 
     @Transactional 
     public PedidoCriarResponse criar(PedidoCriarRequest novoPedido) {
-            if(!validarClienteColaboradorExistem(novoPedido))
-                throw new ColaboradorOuClienteNotFoundException();
-
-            Cliente cliente = clienteRepository.findByCnpj(novoPedido.CNPJcliente());
-            Colaborador colaborador = colaboradorRepository.findByName(novoPedido.colaboradorNome());
+            
+            Cliente cliente = clienteRepository.findByCnpj(novoPedido.CNPJcliente()).orElseThrow(() -> new ClienteNotFoundException(novoPedido.CNPJcliente()));
+            Colaborador colaborador = colaboradorRepository.findByName(novoPedido.colaboradorNome()).orElseThrow(() -> new ColaboradorNotFoundException(novoPedido.colaboradorNome()));
 
             Pedido pedido = new Pedido();
             pedido.setCliente(cliente);
             pedido.setColaborador(colaborador);
             pedido.setDataVencimento(novoPedido.dataVencimento());
             pedido.setDescricao(novoPedido.descricao());
-            List<ItemPedido> itens = itemPedidoMapper.toEntityList(novoPedido.itensPedido());
-            for (ItemPedido i : itens)
-            {
-                i.calcularValorItem();
-            }
-            pedido.setItemsPedido(itens);
+            
+            List<ItemPedido> itensPedidos = criarItemPedidos(novoPedido, pedido);
+
+            pedido.setItemsPedido(itensPedidos);
             pedido.setModalidadePagamento(novoPedido.modalidadePagamento());
             pedido.setStatusPedido(StatusPedido.DISPONIVEL);
             
@@ -63,9 +67,7 @@ public class PedidoService {
             pedido.calcularEsetarValorTotal(desconto);
 
             return pedidoMapper.toDTO(pedidoRepository.save(pedido));
-            
-
-        
+             
     }
 
     public List<PedidoListarResponse> listar(){
@@ -74,12 +76,33 @@ public class PedidoService {
     }
 
 
+    public List<ItemPedido> criarItemPedidos(PedidoCriarRequest novoPedido, Pedido pedido) {
+        
+        HashMap<Long, Long> codigoProdutos = novoPedido.itensPedido().stream().collect(Collectors.toMap(ItemPedidoCriarRequest::codigoIdProduto, ItemPedidoCriarRequest::quantidade, (existing, replacement) -> replacement, HashMap::new));
+            List<Produto> produtos = produtoRepository.findAllById(codigoProdutos.keySet());
+            Map<Long, Produto> produtosPorId = produtos.stream().collect(Collectors.toMap(Produto::getId, Function.identity()));
 
+            if (produtos.size() != codigoProdutos.size())
+                throw new NoValidProdutosForThisPedidoException();
 
-    public boolean validarClienteColaboradorExistem(PedidoCriarRequest pedidoCriarRequest){
-        if (colaboradorRepository.existsByName(pedidoCriarRequest.colaboradorNome()) && clienteRepository.existsByCnpj(pedidoCriarRequest.CNPJcliente()))
-            return true;
-        return false;
+            List<ItemPedido> itensPedidos = new ArrayList<>();
+
+            for (ItemPedidoCriarRequest i : novoPedido.itensPedido()) {
+             
+                Produto produto = produtosPorId.get(i.codigoIdProduto());
+
+                produto.baixarEstoque(i.quantidade());
+                ItemPedido item = new ItemPedido();
+                item.setPedido(pedido);
+                item.setProduto(produto);
+                item.setQuantidade(i.quantidade());
+                item.calcularValorItem();
+
+                itensPedidos.add(item);
+
+            }
+
+            return itensPedidos;
     }
 
     public BigDecimal validarQualMelhorDescontoProCliente(Cliente cliente, PedidoCriarRequest pedidoCriarRequest){

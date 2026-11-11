@@ -1,9 +1,10 @@
 package com.nexus.backend.dtos;
 
-import java.math.BigDecimal;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public record ItemPedidoCriarRequest(
-    Long codigoIdProduto,
-    BigDecimal quantidade
+    @NotNull Long codigoIdProduto,
+    @NotNull @Min(1) Long quantidade
 )
 {}

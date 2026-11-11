@@ -6,19 +6,26 @@ import java.util.List;
 
 import com.nexus.backend.enums.ModalidadePagamento;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
  
 public record PedidoCriarRequest(
     String descricao,
-    String CNPJcliente,
-    String colaboradorNome,
+    @NotNull String CNPJcliente,
+    @NotNull String colaboradorNome,
     @DecimalMax("0.1")
-    @DecimalMin("0.05")
+    @DecimalMin("0.0")
+    @NotNull 
     BigDecimal descontoPermitidoPorcentagem,
-    List<ItemPedidoCriarRequest> itensPedido,
-    ModalidadePagamento modalidadePagamento,
-    LocalDate dataVencimento
+    @NotNull
+    @NotEmpty 
+    List<@Valid ItemPedidoCriarRequest> itensPedido,
+    @NotNull ModalidadePagamento modalidadePagamento,
+    @Future LocalDate dataVencimento
 ) {
     
 }
