@@ -60,7 +60,7 @@ public class Pedido {
     private Cliente cliente;
 
     @ManyToOne 
-    Colaborador colaborador;
+    private Colaborador colaborador;
 
     @OneToMany (mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itemsPedido;

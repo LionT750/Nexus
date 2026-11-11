@@ -11,7 +11,7 @@ import com.nexus.backend.enums.StatusPedido;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long>{
 
-    List<Pedido> findByDataVencimentoBeforeAndStatus(LocalDateTime now, StatusPedido status);
+    List<Pedido> findByDataVencimentoBeforeAndStatusPedido(LocalDateTime now, StatusPedido status);
     
 }
 

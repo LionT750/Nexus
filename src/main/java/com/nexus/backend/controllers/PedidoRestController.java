@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.service.PedidoService;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -29,6 +32,13 @@ public class PedidoRestController {
     public PedidoCriarResponse criarPedido(@Valid @RequestBody PedidoCriarRequest pedido) {
         return pedidoService.criar(pedido);
     }
+
+
+    @GetMapping("/{id}")
+    public PedidoDetailResponse buscarPedidoPorId(@RequestParam Long id) {
+        return pedidoService.buscarPedidoPorId(id);
+    }
+    
 
     @GetMapping
     public List<PedidoListarResponse> listarPedidos() {

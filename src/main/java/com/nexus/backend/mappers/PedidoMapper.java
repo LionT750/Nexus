@@ -7,10 +7,11 @@ import org.mapstruct.Mapping;
 
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.entity.Pedido;
 
-@Mapper (componentModel = "spring")
+@Mapper (componentModel = "spring", uses = {ColaboradorMapper.class, ClienteMapper.class})
 public interface PedidoMapper{
     
     @Mapping (target = "id", ignore = true)
@@ -25,6 +26,8 @@ public interface PedidoMapper{
     @Mapping (source = "id", target = "codigoPedido")
     @Mapping (source = "cliente.name", target = "nomeCliente")
     PedidoCriarResponse toDTO(Pedido  pedido);
+
+    PedidoDetailResponse toDetailDTO(Pedido pedido);
     
     @Mapping (source = "id", target = "codigoPedido")
     @Mapping (source = "cliente.name", target = "nomeCliente")

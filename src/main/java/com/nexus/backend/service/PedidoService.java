@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
@@ -28,6 +29,7 @@ import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
+import com.nexus.backend.exceptions.PedidoNotFoundException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
 import com.nexus.backend.repository.ColaboradorRepository;
@@ -80,7 +82,11 @@ public class PedidoService {
     }
 
     public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
-        return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatus(LocalDateTime.now(), StatusPedido.PENDENTE));
+        return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatusPedido(LocalDateTime.now(), StatusPedido.PENDENTE));
+    }
+
+    public PedidoDetailResponse buscarPedidoPorId(Long id) {
+        return pedidoMapper.toDetailDTO(pedidoRepository.findById(id).orElseThrow(() -> new PedidoNotFoundException(id)));
     }
 
 
