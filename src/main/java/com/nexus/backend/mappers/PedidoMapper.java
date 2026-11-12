@@ -9,6 +9,7 @@ import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
+import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.Pedido;
 
 @Mapper (componentModel = "spring", uses = {ColaboradorMapper.class, ClienteMapper.class})
@@ -35,6 +36,11 @@ public interface PedidoMapper{
     @Mapping (source = "id", target = "codigoPedido")
     @Mapping (source = "cliente.name", target = "nomeCliente")
     PedidoListarResponse toListarDTO(Pedido pedido);
+
+    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
+    SolicitacaoDescontoListarResponse toDescontoDTO(Pedido pedido);
+
+    List<SolicitacaoDescontoListarResponse> toListarDescontoDTO(List<Pedido> pedidos);
 
     List<PedidoListarResponse> toListarDTO(List<Pedido> pedidos);
 }

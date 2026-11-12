@@ -21,6 +21,7 @@ import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
+import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.entity.ItemPedido;
@@ -146,6 +147,10 @@ public class PedidoService {
             throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente().toString());
 
         return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
+    }
+
+    public List<SolicitacaoDescontoListarResponse> listarPedidosComSolicitacaoDescontoAberta() {
+        return pedidoMapper.toListarDescontoDTO(pedidoRepository.findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido.PENDENTE, StatusAprovacaoDesconto.PENDENTE)); 
     }
 
     public PedidoDetailResponse buscarPedidoPorId(Long id) {
