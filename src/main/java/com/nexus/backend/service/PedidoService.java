@@ -36,6 +36,7 @@ import com.nexus.backend.enums.StatusPedido;
 import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
+import com.nexus.backend.exceptions.DataVencimentoObrigatoriaException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
@@ -90,6 +91,9 @@ public class PedidoService {
 
             if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO)
             {
+                if (pedido.getDataVencimento() == null)
+                    throw new DataVencimentoObrigatoriaException();
+
                 if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
                     throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
 
