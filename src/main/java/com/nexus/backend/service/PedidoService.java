@@ -21,6 +21,8 @@ import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
@@ -37,6 +39,7 @@ import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
+import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
 import com.nexus.backend.repository.ColaboradorRepository;
@@ -151,6 +154,39 @@ public class PedidoService {
 
     public List<SolicitacaoDescontoListarResponse> listarPedidosComSolicitacaoDescontoAberta() {
         return pedidoMapper.toListarDescontoDTO(pedidoRepository.findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido.PENDENTE, StatusAprovacaoDesconto.PENDENTE)); 
+    }
+
+    @Transactional
+    public ResolverSolicitacaoDescontoResponse resolverSolicitacaoDesconto(Long idPedido, ResolverSolicitacaoDescontoRequest resolverSolicitacaoDescontoRequest) {
+
+        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+        Colaborador colaborador = colaboradorRepository.findById(resolverSolicitacaoDescontoRequest.idColaborador()).orElseThrow(() -> new ColaboradorNotFoundException(resolverSolicitacaoDescontoRequest.idColaborador().toString()));
+
+        if (pedido.getStatusAprovacaoDesconto() != StatusAprovacaoDesconto.PENDENTE)
+            throw new SolicitacaoDescontoNaoPodeSerResolvidaException("A solicitacao de desconto nao pode ser resolvida pois nao esta pendente, status atual: " + pedido.getStatusAprovacaoDesconto());
+
+        if (resolverSolicitacaoDescontoRequest.statusAprovacaoDesconto() != StatusAprovacaoDesconto.APROVADO
+        && resolverSolicitacaoDescontoRequest.statusAprovacaoDesconto() != StatusAprovacaoDesconto.REPROVADO)
+            throw new SolicitacaoDescontoNaoPodeSerResolvidaException("A solicitacao de desconto so pode ser resolvida como APROVADO ou REPROVADO");
+
+        pedido.setColaborador(colaborador);
+        pedido.setStatusAprovacaoDesconto(resolverSolicitacaoDescontoRequest.statusAprovacaoDesconto());
+        pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+
+        if (pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.APROVADO) {
+            BigDecimal valorTotalAntesDoDesconto = pedido.getValorTotal();
+
+            pedido.setDescontoAutorizado(pedido.getDescontoSolicitado());
+            pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
+
+            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO) {
+                Cliente cliente = pedido.getCliente();
+                cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().add(valorTotalAntesDoDesconto.subtract(pedido.getValorTotal())));
+            }
+        }
+
+        validarPedidoNumEstadoValido(pedido);
+        return pedidoMapper.toResolverDescontoDTO(pedidoRepository.save(pedido));
     }
 
     public PedidoDetailResponse buscarPedidoPorId(Long id) {

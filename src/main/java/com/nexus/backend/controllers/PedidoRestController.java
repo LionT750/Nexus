@@ -8,6 +8,8 @@ import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.service.PedidoService;
 
@@ -20,6 +22,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 
 
@@ -61,6 +65,11 @@ public class PedidoRestController {
     public List<PedidoListarResponse> listarPedidosDoCliente(@Valid @RequestParam(required = false) Long idCliente,@Valid @RequestParam(required = false)  String emailCliente,@Valid @RequestParam(required = false)  String cnpjCliente) {
         PedidoPorClienteRequest dto = new PedidoPorClienteRequest(idCliente, cnpjCliente, emailCliente);
         return pedidoService.listarPedidosDoCliente(dto);
+    }
+
+    @PutMapping("/{id}/desconto")
+    public ResolverSolicitacaoDescontoResponse resolverSolicitacaoDesconto(@PathVariable Long id, @Valid @RequestBody ResolverSolicitacaoDescontoRequest resolverSolicitacaoDescontoRequest) {
+        return pedidoService.resolverSolicitacaoDesconto(id, resolverSolicitacaoDescontoRequest);
     }
     
     
