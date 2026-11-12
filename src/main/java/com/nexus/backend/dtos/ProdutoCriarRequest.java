@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 public record ProdutoCriarRequest(
     @NotNull @NotEmpty String nome,
     String descricao,
-    Long estoque,
-    BigDecimal preco
+    @NotNull Long estoque,
+    @NotNull BigDecimal preco
 ) 
 {} 
