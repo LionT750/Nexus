@@ -10,6 +10,11 @@ public class ClienteNotFoundException extends ErrorResponseException {
         setDetail("A operação não foi executada pois o cliente informado CNPJ: " + cnpjCliente + " não existe");
     }
 
+    public ClienteNotFoundException(String campo, String valor) {
+        super(HttpStatus.NOT_FOUND);
+        setDetail("A operação não foi executada pois o cliente informado " + campo + ": " + valor + " não existe");
+    }
+
     public ClienteNotFoundException(Long id) {
         super(HttpStatus.NOT_FOUND);
         setDetail("A operação não foi executada pois o cliente informado id: " + id + " não existe");

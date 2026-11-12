@@ -134,7 +134,7 @@ public class PedidoService {
             switch (nomePropriedade) {
                 case "idCliente":
                     if (!clienteRepository.existsById(pedidoPorClienteRequest.idCliente()))
-                        throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente().toString());
+                        throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente());
                     return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
     
                 case "CNPJcliente":
@@ -144,14 +144,14 @@ public class PedidoService {
 
                 case "emailCliente":
                     if (!clienteRepository.existsByEmail(valor))
-                        throw new ClienteNotFoundException(valor);
+                        throw new ClienteNotFoundException("email", valor);
                     return pedidoMapper.toListarDTO(pedidoRepository.findByClienteEmail(valor));
             }
         }
 
 
         if (!clienteRepository.existsById(pedidoPorClienteRequest.idCliente()))
-            throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente().toString());
+            throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente());
 
         return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
     }
