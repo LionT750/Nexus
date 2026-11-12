@@ -8,7 +8,6 @@ import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
-import com.nexus.backend.entity.Pedido;
 import com.nexus.backend.service.PedidoService;
 
 import jakarta.validation.Valid;
