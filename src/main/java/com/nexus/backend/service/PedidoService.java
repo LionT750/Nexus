@@ -80,7 +80,7 @@ public class PedidoService {
                 pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
             else if (novoPedido.descontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) <= 0 && cliente.getClassificacao() == ClienteClassificao.VIP)
             {
-                pedido.setDescontoAutorizado(novoPedido.descontoSolicitado());
+                pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
                 pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
                 pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
             }
