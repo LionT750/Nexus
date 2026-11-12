@@ -7,6 +7,7 @@ import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
+import com.nexus.backend.dtos.PedidoPorClienteRequest;
 import com.nexus.backend.service.PedidoService;
 
 import jakarta.validation.Valid;
@@ -49,6 +50,12 @@ public class PedidoRestController {
     public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
         return pedidoService.listarPedidosVencidosEmAberto();
     }
+
+    @PostMapping("/cliente")
+    public List<PedidoListarResponse> listarPedidosDoCliente(@RequestBody PedidoPorClienteRequest pedidoPorClienteRequest) {
+        return pedidoService.listarPedidosDoCliente(pedidoPorClienteRequest);
+    }
+    
     
     
 

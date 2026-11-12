@@ -2,8 +2,11 @@ package com.nexus.backend.dtos;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 public record ProdutoCriarRequest(
-    String nome,
+    @NotNull @NotEmpty String nome,
     String descricao,
     Long estoque,
     BigDecimal preco

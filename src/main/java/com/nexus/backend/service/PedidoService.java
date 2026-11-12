@@ -1,11 +1,15 @@
 package com.nexus.backend.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,6 +21,7 @@ import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
+import com.nexus.backend.dtos.PedidoPorClienteRequest;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.entity.ItemPedido;
@@ -25,6 +30,7 @@ import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.ClienteClassificao;
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusPedido;
+import com.nexus.backend.exceptions.ClienteAlreadyCadastradoException;
 import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
@@ -82,7 +88,49 @@ public class PedidoService {
     }
 
     public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
-        return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatusPedido(LocalDateTime.now(), StatusPedido.PENDENTE));
+        return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatusPedido(LocalDate.now(), StatusPedido.PENDENTE));
+    }
+
+    public List<PedidoListarResponse> listarPedidosDoCliente(PedidoPorClienteRequest pedidoPorClienteRequest) {
+
+        Map<String, String> camposDeIdentificacao = new LinkedHashMap<>();
+
+        camposDeIdentificacao.put("idCliente", pedidoPorClienteRequest.idCliente() != null ? pedidoPorClienteRequest.idCliente().toString() : null);
+
+        camposDeIdentificacao.put("CNPJcliente", pedidoPorClienteRequest.CNPJcliente());
+
+        camposDeIdentificacao.put("emailCliente", pedidoPorClienteRequest.emailCliente());
+
+        camposDeIdentificacao.values().removeIf(Objects::isNull);
+
+        for (Map.Entry<String, String> campo : camposDeIdentificacao.entrySet()) {
+
+            String nomePropriedade = campo.getKey();
+            String valor = campo.getValue();
+
+            switch (nomePropriedade) {
+                case "idCliente":
+                    if (!clienteRepository.existsById(pedidoPorClienteRequest.idCliente()))
+                        throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente().toString());
+                    return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
+    
+                case "CNPJcliente":
+                    if (!clienteRepository.existsByCnpj(valor))
+                        throw new ClienteNotFoundException(valor);
+                    return pedidoMapper.toListarDTO(pedidoRepository.findByClienteCnpj(valor));
+
+                case "emailCliente":
+                    if (!clienteRepository.existsByEmail(valor))
+                        throw new ClienteNotFoundException(valor);
+                    return pedidoMapper.toListarDTO(pedidoRepository.findByClienteEmail(valor));
+            }
+        }
+
+
+        if (!clienteRepository.existsById(pedidoPorClienteRequest.idCliente()))
+            throw new ClienteNotFoundException(pedidoPorClienteRequest.idCliente().toString());
+
+        return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
     }
 
     public PedidoDetailResponse buscarPedidoPorId(Long id) {
