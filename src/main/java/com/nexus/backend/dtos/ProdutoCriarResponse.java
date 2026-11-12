@@ -7,5 +7,7 @@ public record ProdutoCriarResponse(
     String nome,
     String descricao,
     Long estoque,
-    BigDecimal preco) 
+    BigDecimal precoVenda,
+    BigDecimal precoAluguel
+) 
 {}

@@ -1,6 +1,7 @@
 package com.nexus.backend.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.SoftDelete;
 
@@ -9,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,8 +43,14 @@ public class ItemPedido {
 
     private BigDecimal valorItem;
 
+    @Future
+    private LocalDate dataVencimentoAluguel;
+
     public void calcularValorItem(){
-        valorItem = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
+        if (dataVencimentoAluguel == null)
+            valorItem = produto.getPrecoVenda().multiply(BigDecimal.valueOf(quantidade));
+        else
+            valorItem = produto.getPrecoAluguel().multiply(BigDecimal.valueOf(quantidade));
     }
     
 }

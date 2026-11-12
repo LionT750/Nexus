@@ -9,6 +9,7 @@ public record ProdutoCriarRequest(
     @NotNull @NotEmpty String nome,
     String descricao,
     @NotNull Long estoque,
-    @NotNull BigDecimal preco
+    @NotNull BigDecimal precoVenda,
+    @NotNull BigDecimal precoAluguel
 ) 
 {} 

@@ -76,7 +76,7 @@ public class PedidoService {
             pedido.setDescontoSolicitado(novoPedido.descontoSolicitado());
             pedido.setDescontoAutorizado(BigDecimal.valueOf(0.0));
             
-            if (novoPedido.descontoSolicitado().compareTo(BigDecimal.ZERO) == 0)
+            if (novoPedido.descontoSolicitado().compareTo(BigDecimal.ZERO) == 0 && cliente.getClassificacao() == ClienteClassificao.NORMAL)
                 pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
             else if (novoPedido.descontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) <= 0 && cliente.getClassificacao() == ClienteClassificao.VIP)
             {
@@ -218,6 +218,10 @@ public class PedidoService {
                 item.setPedido(pedido);
                 item.setProduto(produto);
                 item.setQuantidade(i.quantidade());
+                if (i.dataVencimentoAluguel() != null)
+                    item.setDataVencimentoAluguel(i.dataVencimentoAluguel());
+                else
+                    item.setDataVencimentoAluguel(null);
                 item.calcularValorItem();
 
                 itensPedidos.add(item);

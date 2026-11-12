@@ -3,6 +3,7 @@ package com.nexus.backend.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexus.backend.dtos.ItemPedidoListarAlugueisResponse;
 import com.nexus.backend.dtos.ProdutoCriarRequest;
 import com.nexus.backend.dtos.ProdutoCriarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
@@ -36,4 +37,10 @@ public class ProdutoRestController {
     public List<ProdutoListarResponse> listarClientes() {
         return produtoService.listar();
     }
+
+    @GetMapping("/listarAlugados")
+    public List<ItemPedidoListarAlugueisResponse> listarAlugados() {
+        return produtoService.listarAlugados();
+    }
+    
 }

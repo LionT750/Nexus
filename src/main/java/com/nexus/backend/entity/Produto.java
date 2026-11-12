@@ -42,7 +42,10 @@ public class Produto {
     private Long estoque;
 
     @Min(0)
-    private BigDecimal preco;
+    private BigDecimal precoVenda;
+
+    @Min(0)
+    private BigDecimal precoAluguel;
 
     @Enumerated(EnumType.STRING)
     private StatusProduto statusProduto;

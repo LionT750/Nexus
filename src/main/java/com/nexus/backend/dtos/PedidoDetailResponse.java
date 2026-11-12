@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.nexus.backend.enums.ModalidadePagamento;
+import com.nexus.backend.enums.StatusAprovacaoDesconto;
 import com.nexus.backend.enums.StatusPedido;
 
 public record PedidoDetailResponse(
@@ -19,6 +20,8 @@ public record PedidoDetailResponse(
     LocalDate dataVencimento,
 
     StatusPedido statusPedido,
+
+    StatusAprovacaoDesconto statusAprovacaoDesconto,
 
     ModalidadePagamento modalidadePagamento,
 

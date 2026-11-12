@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
