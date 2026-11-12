@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.nexus.backend.enums.ModalidadePagamento;
+import com.nexus.backend.enums.StatusAprovacaoDesconto;
 import com.nexus.backend.enums.StatusPedido;
 
 import jakarta.persistence.CascadeType;
@@ -19,7 +21,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,8 +55,24 @@ public class Pedido {
 
     private LocalDate dataVencimento;
 
+    private LocalDate dataAtualizacaoDesconto;
+
+    @DecimalMax("0.1")
+    @DecimalMin("0.0")
+    @NotNull 
+    private BigDecimal descontoAutorizado;
+
+    @DecimalMax("0.1")
+    @DecimalMin("0.0")
+    @NotNull 
+    private BigDecimal descontoSolicitado;
+
+
     @Enumerated (EnumType.STRING)
     private StatusPedido statusPedido;
+
+    @Enumerated (EnumType.STRING)
+    private StatusAprovacaoDesconto statusAprovacaoDesconto;
 
     @Enumerated (EnumType.STRING)
     private ModalidadePagamento modalidadePagamento;

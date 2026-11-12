@@ -16,11 +16,10 @@ import jakarta.validation.constraints.NotNull;
 public record PedidoCriarRequest(
     String descricao,
     @NotNull String CNPJcliente,
-    @NotNull String colaboradorNome,
     @DecimalMax("0.1")
     @DecimalMin("0.0")
     @NotNull 
-    BigDecimal descontoPermitidoPorcentagem,
+    BigDecimal descontoSolicitado,
     @NotNull
     @NotEmpty 
     List<@Valid ItemPedidoCriarRequest> itensPedido,

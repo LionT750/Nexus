@@ -2,6 +2,7 @@ package com.nexus.backend.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,11 +28,13 @@ import com.nexus.backend.entity.Pedido;
 import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.ClienteClassificao;
 import com.nexus.backend.enums.ModalidadePagamento;
+import com.nexus.backend.enums.StatusAprovacaoDesconto;
 import com.nexus.backend.enums.StatusPedido;
 import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
+import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
@@ -54,11 +57,9 @@ public class PedidoService {
     public PedidoCriarResponse criar(PedidoCriarRequest novoPedido) {
             
             Cliente cliente = clienteRepository.findByCnpj(novoPedido.CNPJcliente()).orElseThrow(() -> new ClienteNotFoundException(novoPedido.CNPJcliente()));
-            Colaborador colaborador = colaboradorRepository.findByName(novoPedido.colaboradorNome()).orElseThrow(() -> new ColaboradorNotFoundException(novoPedido.colaboradorNome()));
-
+            
             Pedido pedido = new Pedido();
             pedido.setCliente(cliente);
-            pedido.setColaborador(colaborador);
             pedido.setDataVencimento(novoPedido.dataVencimento());
             pedido.setDescricao(novoPedido.descricao());
             
@@ -67,14 +68,31 @@ public class PedidoService {
             pedido.setItemsPedido(itensPedidos);
             pedido.setModalidadePagamento(novoPedido.modalidadePagamento());
             pedido.setStatusPedido(StatusPedido.PENDENTE);
+            pedido.setDescontoSolicitado(novoPedido.descontoSolicitado());
+            pedido.setDescontoAutorizado(BigDecimal.valueOf(0.0));
             
-            BigDecimal desconto = validarQualMelhorDescontoProCliente(cliente, novoPedido);
+            if (novoPedido.descontoSolicitado().compareTo(BigDecimal.ZERO) == 0)
+                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
+            else if (novoPedido.descontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) <= 0 && cliente.getClassificacao() == ClienteClassificao.VIP)
+            {
+                pedido.setDescontoAutorizado(novoPedido.descontoSolicitado());
+                pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
+            }
+            else
+                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.PENDENTE);
 
-            pedido.calcularEsetarValorTotal(desconto);
+            pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
 
-            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO && pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
-                throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
+            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO)
+            {
+                if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+                    throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
 
+                cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().subtract(pedido.getValorTotal()));
+            }
+
+            validarPedidoNumEstadoValido(pedido);
             return pedidoMapper.toDTO(pedidoRepository.save(pedido));
              
     }
@@ -163,19 +181,18 @@ public class PedidoService {
 
             return itensPedidos;
     }
-
-    public BigDecimal validarQualMelhorDescontoProCliente(Cliente cliente, PedidoCriarRequest pedidoCriarRequest){
-        BigDecimal melhorDesconto = BigDecimal.ZERO;
-
-        if (cliente.getClassificacao() == ClienteClassificao.VIP)
-            melhorDesconto = BigDecimal.valueOf(0.05);
-
-        if (melhorDesconto.compareTo(pedidoCriarRequest.descontoPermitidoPorcentagem()) < 0) {
-            melhorDesconto = pedidoCriarRequest.descontoPermitidoPorcentagem();
-        }
-
-        return melhorDesconto;
-    }
   
+
+    public void validarPedidoNumEstadoValido(Pedido pedido) {
+        if (pedido.getStatusPedido() != StatusPedido.PENDENTE && pedido.getStatusAprovacaoDesconto() == (StatusAprovacaoDesconto.PENDENTE))
+            throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois contem uma solicitacao de desconto pendente de autorizacao");
+
+        if ((pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.APROVADO
+        || pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.REPROVADO) 
+        && pedido.getColaborador() == null)
+            throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois o desconto aprovado/reprovado nao possui um colaborador especificado");
+
+    }
+
 }
 

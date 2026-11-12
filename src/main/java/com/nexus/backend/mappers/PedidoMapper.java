@@ -21,6 +21,9 @@ public interface PedidoMapper{
     @Mapping (target = "colaborador", ignore = true)
     @Mapping (target = "itemsPedido", ignore = true)
     @Mapping( target = "valorTotal", ignore = true)
+    @Mapping (target = "dataAtualizacaoDesconto", ignore = true)
+    @Mapping (target = "descontoAutorizado", ignore = true)
+    @Mapping (target = "statusAprovacaoDesconto", ignore = true)
     Pedido toEntity(PedidoCriarRequest dto);
     
     @Mapping (source = "id", target = "codigoPedido")
