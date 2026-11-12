@@ -1,5 +1,6 @@
 package com.nexus.backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,6 +31,10 @@ public class ClienteService {
             throw new ClienteAlreadyCadastradoException(novoCliente.cnpj());
 
         Cliente cliente = clienteMapper.toEntity(novoCliente);
+
+        if (cliente.getLimiteDeCredito() == null)
+            cliente.setLimiteDeCredito(BigDecimal.ZERO);
+
         Cliente persistedCliente = clienteRepository.save(cliente);
         return clienteMapper.toDTO(persistedCliente);
         
