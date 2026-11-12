@@ -11,6 +11,8 @@ import com.nexus.backend.service.ProdutoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class ProdutoRestController {
     private final ProdutoService produtoService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ProdutoCriarResponse criarProduto(@Valid @RequestBody ProdutoCriarRequest produto) {
         return produtoService.criar(produto);
     }

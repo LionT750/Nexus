@@ -16,6 +16,8 @@ import com.nexus.backend.service.PedidoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -35,6 +37,7 @@ public class PedidoRestController {
     private final PedidoService pedidoService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public PedidoCriarResponse criarPedido(@Valid @RequestBody PedidoCriarRequest pedido) {
         return pedidoService.criar(pedido);
     }

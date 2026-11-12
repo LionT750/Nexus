@@ -11,6 +11,8 @@ import com.nexus.backend.service.ClienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class ClienteRestController {
     private final ClienteService clienteService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ClienteCriarResponse criarCliente(@Valid @RequestBody ClienteCriarRequest cliente) {
         return clienteService.criar(cliente);
     }

@@ -11,6 +11,8 @@ import com.nexus.backend.service.ColaboradorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class ColaboradorRestController {
     private final ColaboradorService colaboradorService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ColaboradorCriarResponse criarColaborador(@Valid @RequestBody ColaboradorCriarRequest colaborador) {
         return colaboradorService.criar(colaborador);
     }
