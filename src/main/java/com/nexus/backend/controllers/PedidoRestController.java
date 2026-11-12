@@ -41,7 +41,7 @@ public class PedidoRestController {
 
 
     @GetMapping("/{id}")
-    public PedidoDetailResponse buscarPedidoPorId(@RequestParam Long id) {
+    public PedidoDetailResponse buscarPedidoPorId(@PathVariable Long id) {
         return pedidoService.buscarPedidoPorId(id);
     }
     
