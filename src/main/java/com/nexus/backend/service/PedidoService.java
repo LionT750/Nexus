@@ -189,6 +189,19 @@ public class PedidoService {
             }
         }
 
+         if (pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.REPROVADO && pedido.getCliente().getClassificacao() == ClienteClassificao.VIP) {
+            BigDecimal valorTotalAntesDoDesconto = pedido.getValorTotal();
+
+            pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
+            pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
+
+            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO) {
+                Cliente cliente = pedido.getCliente();
+                cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().add(valorTotalAntesDoDesconto.subtract(pedido.getValorTotal())));
+            }
+        }
+
+
         validarPedidoNumEstadoValido(pedido);
         return pedidoMapper.toResolverDescontoDTO(pedidoRepository.save(pedido));
     }
