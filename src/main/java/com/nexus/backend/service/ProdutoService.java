@@ -39,7 +39,7 @@ public class ProdutoService {
     }
 
     public List<ItemPedidoListarAlugueisResponse> listarAlugados() {
-        List<ItemPedido> itensPedidosAluguel = itemPedidoRepository.findByDataVencimentoAluguelIsNotNull();
+        List<ItemPedido> itensPedidosAluguel = itemPedidoRepository.findByisAluguelTrue();
         return itemPedidoMapper.toAluguelDTO(itensPedidosAluguel);
     }
   

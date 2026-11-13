@@ -10,8 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,11 +43,13 @@ public class ItemPedido {
 
     private BigDecimal valorItem;
 
-    @Future
+    @NotNull 
+    private boolean isAluguel;
+
     private LocalDate dataVencimentoAluguel;
 
     public void calcularValorItem(){
-        if (dataVencimentoAluguel == null)
+        if (isAluguel == true)
             valorItem = produto.getPrecoVenda().multiply(BigDecimal.valueOf(quantidade));
         else
             valorItem = produto.getPrecoAluguel().multiply(BigDecimal.valueOf(quantidade));

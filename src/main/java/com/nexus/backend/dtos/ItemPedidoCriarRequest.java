@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record ItemPedidoCriarRequest(
     @NotNull Long codigoIdProduto,
     @NotNull @Min(1) Long quantidade,
+    @NotNull boolean isAluguel,
     @Future LocalDate dataVencimentoAluguel
 )
 {}

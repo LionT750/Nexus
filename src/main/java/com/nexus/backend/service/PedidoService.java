@@ -218,8 +218,11 @@ public class PedidoService {
                 item.setPedido(pedido);
                 item.setProduto(produto);
                 item.setQuantidade(i.quantidade());
-                if (i.dataVencimentoAluguel() != null)
+                if (i.isAluguel() == true)
+                {
+                    item.setAluguel(i.isAluguel());
                     item.setDataVencimentoAluguel(i.dataVencimentoAluguel());
+                }
                 else
                     item.setDataVencimentoAluguel(null);
                 item.calcularValorItem();
