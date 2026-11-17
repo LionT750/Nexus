@@ -50,9 +50,9 @@ public class ItemPedido {
 
     public void calcularValorItem(){
         if (isAluguel == true)
-            valorItem = produto.getPrecoVenda().multiply(BigDecimal.valueOf(quantidade));
-        else
             valorItem = produto.getPrecoAluguel().multiply(BigDecimal.valueOf(quantidade));
+        else
+            valorItem = produto.getPrecoVenda().multiply(BigDecimal.valueOf(quantidade));
     }
     
 }
