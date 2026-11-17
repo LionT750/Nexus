@@ -11,7 +11,9 @@ import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
+import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
+import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Pedido;
@@ -23,12 +25,15 @@ public interface PedidoMapper{
     @Mapping (target = "dataCriacao", ignore = true)
     @Mapping (target = "statusPedido", ignore = true)
     @Mapping (target = "cliente", ignore = true)
-    @Mapping (target = "colaborador", ignore = true)
+    @Mapping (target = "colaboradorDesconto", ignore = true)
+    @Mapping (target = "colaboradorAprovacaoFiado", ignore = true)
     @Mapping (target = "itemsPedido", ignore = true)
     @Mapping( target = "valorTotal", ignore = true)
     @Mapping (target = "dataAtualizacaoDesconto", ignore = true)
     @Mapping (target = "descontoAutorizado", ignore = true)
     @Mapping (target = "statusAprovacaoDesconto", ignore = true)
+    @Mapping (target = "dataAtualizacaoAprovacaoFiado", ignore = true)
+    @Mapping( target = "statusAprovacaoFiadoParaDevedor", ignore = true)
     Pedido toEntity(PedidoCriarRequest dto);
     
     @Mapping (source = "id", target = "codigoPedido")
@@ -47,8 +52,18 @@ public interface PedidoMapper{
     List<SolicitacaoDescontoListarResponse> toListarDescontoDTO(List<Pedido> pedidos);
 
     @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
-    @Mapping (source = "colaborador.name", target = "nomeColaborador")
+    @Mapping (target = "pedido", ignore = true)
+    SolicitacaoAprovacaoDevedorListarResponse toDevedorDTO(Pedido pedido);
+
+    List<SolicitacaoAprovacaoDevedorListarResponse> toListarDevedorDTO(List<Pedido> pedidos);
+
+    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
+    @Mapping (source = "colaboradorDesconto.name", target = "nomeColaborador")
     ResolverSolicitacaoDescontoResponse toResolverDescontoDTO(Pedido pedido);
+
+    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
+    @Mapping (source = "colaboradorDesconto.name", target = "nomeColaborador")
+    ResolverSolicitacaoAprovacaoDevedorResponse toResolverDevedorDTO(Pedido pedido);
 
     List<PedidoListarResponse> toListarDTO(List<Pedido> pedidos);
 

@@ -5,5 +5,6 @@ public enum StatusAprovacaoDesconto {
     PENDENTE,
     APROVADO,
     APROVADO_AUTOMATICAMENTE,
-    REPROVADO
+    REPROVADO,
+    REPROVADO_INADIPLENCIA
 }

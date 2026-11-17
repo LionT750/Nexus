@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotNull;
 public record PedidoCriarRequest(
     String descricao,
     @NotNull String CNPJcliente,
-    @DecimalMax("0.1")
+    @DecimalMax("0.15")
     @DecimalMin("0.0")
     @NotNull 
     BigDecimal descontoSolicitado,

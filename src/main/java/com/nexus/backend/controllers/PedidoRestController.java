@@ -10,8 +10,11 @@ import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
+import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.service.PedidoService;
 
@@ -66,6 +69,11 @@ public class PedidoRestController {
         return pedidoService.listarPedidosComSolicitacaoDescontoAberta();
     }
 
+    @GetMapping("/solicitacaoAprovacaoDevedorEmAberto")
+    public List<SolicitacaoAprovacaoDevedorListarResponse> listarPedidosComSolicitacaoAprovacaoDevedor() {
+        return pedidoService.listarPedidosComSolicitacaoAprovacaoDevedor();
+    }
+
     @GetMapping("/cliente")
     public List<PedidoListarResponse> listarPedidosDoCliente(@Valid @RequestParam(required = false) Long idCliente,@Valid @RequestParam(required = false)  String emailCliente,@Valid @RequestParam(required = false)  String cnpjCliente) {
         PedidoPorClienteRequest dto = new PedidoPorClienteRequest(idCliente, cnpjCliente, emailCliente);
@@ -75,6 +83,11 @@ public class PedidoRestController {
     @PutMapping("/{id}/desconto")
     public ResolverSolicitacaoDescontoResponse resolverSolicitacaoDesconto(@PathVariable Long id, @Valid @RequestBody ResolverSolicitacaoDescontoRequest resolverSolicitacaoDescontoRequest) {
         return pedidoService.resolverSolicitacaoDesconto(id, resolverSolicitacaoDescontoRequest);
+    }
+
+    @PutMapping("/{id}/fiado")
+    public ResolverSolicitacaoAprovacaoDevedorResponse resolverSolicitacaoFiadoParaDevedor(@PathVariable Long id, @Valid @RequestBody ResolverSolicitacaoAprovacaoDevedorRequest resolverSolicitacaoAprovacaoDevedorRequest) {
+        return pedidoService.resolverSolicitacaoFiadoParaDevedor(id, resolverSolicitacaoAprovacaoDevedorRequest);
     }
 
     @PutMapping("/{id}/finalizar")

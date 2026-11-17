@@ -6,6 +6,7 @@ public record ProdutoListarResponse(
     String nome,
     String descricao,
     Long estoque,
-    BigDecimal preco
+    BigDecimal precoVenda,
+    BigDecimal precoAluguel
 )   
 {}

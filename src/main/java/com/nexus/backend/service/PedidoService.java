@@ -23,8 +23,11 @@ import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorRequest;
+import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
+import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.Cliente;
 import com.nexus.backend.entity.Colaborador;
@@ -34,6 +37,7 @@ import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.ClienteClassificao;
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
+import com.nexus.backend.enums.StatusAprovacaoFiadoParaDevedor;
 import com.nexus.backend.enums.StatusPedido;
 import com.nexus.backend.exceptions.AluguelMustHaveAdataVencimentoException;
 import com.nexus.backend.exceptions.AluguelNaoPodeSerDevolvidoException;
@@ -45,6 +49,7 @@ import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerFinalizadoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
+import com.nexus.backend.exceptions.SolicitacaoAprovacaoFiadoParaDevedorNaoPodeSerResolvidaException;
 import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
@@ -67,7 +72,8 @@ public class PedidoService {
     public PedidoCriarResponse criar(PedidoCriarRequest novoPedido) {
             
             Cliente cliente = clienteRepository.findByCnpj(novoPedido.CNPJcliente()).orElseThrow(() -> new ClienteNotFoundException(novoPedido.CNPJcliente()));
-            
+            boolean ehClienteInadiplente = validarSeClienteEhInadiplente(cliente);
+
             Pedido pedido = new Pedido();
             pedido.setCliente(cliente);
             pedido.setDataVencimento(novoPedido.dataVencimento());
@@ -78,23 +84,37 @@ public class PedidoService {
             pedido.setItemsPedido(itensPedidos);
             pedido.setModalidadePagamento(novoPedido.modalidadePagamento());
             pedido.setStatusPedido(StatusPedido.PENDENTE);
-            pedido.setDescontoSolicitado(novoPedido.descontoSolicitado());
-            pedido.setDescontoAutorizado(BigDecimal.valueOf(0.0));
-            
-            if (novoPedido.descontoSolicitado().compareTo(BigDecimal.ZERO) == 0 && cliente.getClassificacao() == ClienteClassificao.NORMAL)
-                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
-            else if (novoPedido.descontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) <= 0 && cliente.getClassificacao() == ClienteClassificao.VIP)
+
+            if (!ehClienteInadiplente)
             {
-                pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
-                pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
-                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
+                pedido.setDescontoSolicitado(gerarDescontoSolicitadoBaseadoClassificacaoCliente(novoPedido, cliente));
+                pedido.setDescontoAutorizado(BigDecimal.valueOf(0.0));
+                
+                if (novoPedido.descontoSolicitado().compareTo(BigDecimal.ZERO) == 0 && cliente.getClassificacao() == ClienteClassificao.NORMAL)
+                    pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
+                else if (novoPedido.descontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) <= 0 && cliente.getClassificacao() == ClienteClassificao.VIP)
+                {
+                    pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
+                    pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+                    pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
+                }
+                else
+                    pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.PENDENTE);
+
+                pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
             }
+
             else
-                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.PENDENTE);
+            {
+                pedido.setDescontoSolicitado(gerarDescontoSolicitadoBaseadoClassificacaoCliente(novoPedido, cliente));
+                pedido.setDescontoAutorizado(BigDecimal.valueOf(0.0));
+                pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.REPROVADO_INADIPLENCIA);
+                pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
+            }
 
-            pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
+            pedido.setStatusAprovacaoFiadoParaDevedor(StatusAprovacaoFiadoParaDevedor.NAO_SE_APLICA);
 
-            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO)
+            if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO && !ehClienteInadiplente)
             {
                 if (pedido.getDataVencimento() == null)
                     throw new DataVencimentoObrigatoriaException();
@@ -102,7 +122,20 @@ public class PedidoService {
                 if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
                     throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
 
+                pedido.setStatusAprovacaoFiadoParaDevedor(StatusAprovacaoFiadoParaDevedor.NAO_SE_APLICA);
+
                 cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().subtract(pedido.getValorTotal()));
+            }
+
+            else if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO && ehClienteInadiplente) {
+                if (pedido.getDataVencimento() == null)
+                    throw new DataVencimentoObrigatoriaException();
+
+                if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+                    throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
+
+                pedido.setStatusAprovacaoFiadoParaDevedor(StatusAprovacaoFiadoParaDevedor.PENDENTE);
+
             }
 
             validarPedidoNumEstadoValido(pedido);
@@ -161,6 +194,31 @@ public class PedidoService {
         return pedidoMapper.toListarDTO(pedidoRepository.findByClienteId(pedidoPorClienteRequest.idCliente()));
     }
 
+    public List<SolicitacaoAprovacaoDevedorListarResponse> listarPedidosComSolicitacaoAprovacaoDevedor() {
+        return pedidoMapper.toListarDevedorDTO(pedidoRepository.findByStatusPedidoAndStatusAprovacaoFiadoParaDevedor(StatusPedido.PENDENTE, StatusAprovacaoFiadoParaDevedor.PENDENTE)); 
+    }
+
+    @Transactional
+    public ResolverSolicitacaoAprovacaoDevedorResponse resolverSolicitacaoFiadoParaDevedor(Long idPedido, ResolverSolicitacaoAprovacaoDevedorRequest resolverSolicitacaoAprovacaoDevedorRequest) {
+
+        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+        Colaborador colaborador = colaboradorRepository.findById(resolverSolicitacaoAprovacaoDevedorRequest.idColaborador()).orElseThrow(() -> new ColaboradorNotFoundException(resolverSolicitacaoAprovacaoDevedorRequest.idColaborador().toString()));
+
+        if (pedido.getStatusAprovacaoFiadoParaDevedor() != StatusAprovacaoFiadoParaDevedor.PENDENTE)
+            throw new SolicitacaoAprovacaoFiadoParaDevedorNaoPodeSerResolvidaException("A solicitacao de fiado nao pode ser resolvida pois nao esta pendente, status atual: " + pedido.getStatusAprovacaoFiadoParaDevedor());
+
+        if (resolverSolicitacaoAprovacaoDevedorRequest.statusAprovacaoFiadoParaDevedor() != StatusAprovacaoFiadoParaDevedor.APROVADO
+        && resolverSolicitacaoAprovacaoDevedorRequest.statusAprovacaoFiadoParaDevedor() != StatusAprovacaoFiadoParaDevedor.REPROVADO)
+            throw new SolicitacaoAprovacaoFiadoParaDevedorNaoPodeSerResolvidaException("A solicitacao de fiado so pode ser resolvida como APROVADO ou REPROVADO");
+
+        pedido.setColaboradorAprovacaoFiado(colaborador);
+        pedido.setStatusAprovacaoFiadoParaDevedor(resolverSolicitacaoAprovacaoDevedorRequest.statusAprovacaoFiadoParaDevedor());
+        pedido.setDataAtualizacaoAprovacaoFiado(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+
+        validarPedidoNumEstadoValido(pedido);
+        return pedidoMapper.toResolverDevedorDTO(pedidoRepository.save(pedido));
+    }
+
     public List<SolicitacaoDescontoListarResponse> listarPedidosComSolicitacaoDescontoAberta() {
         return pedidoMapper.toListarDescontoDTO(pedidoRepository.findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido.PENDENTE, StatusAprovacaoDesconto.PENDENTE)); 
     }
@@ -178,7 +236,7 @@ public class PedidoService {
         && resolverSolicitacaoDescontoRequest.statusAprovacaoDesconto() != StatusAprovacaoDesconto.REPROVADO)
             throw new SolicitacaoDescontoNaoPodeSerResolvidaException("A solicitacao de desconto so pode ser resolvida como APROVADO ou REPROVADO");
 
-        pedido.setColaborador(colaborador);
+        pedido.setColaboradorDesconto(colaborador);
         pedido.setStatusAprovacaoDesconto(resolverSolicitacaoDescontoRequest.statusAprovacaoDesconto());
         pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
 
@@ -305,8 +363,28 @@ public class PedidoService {
 
         if ((pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.APROVADO
         || pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.REPROVADO) 
-        && pedido.getColaborador() == null)
+        && pedido.getColaboradorDesconto() == null)
             throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois o desconto aprovado/reprovado nao possui um colaborador especificado");
+
+    
+        if (pedido.getStatusAprovacaoFiadoParaDevedor() == StatusAprovacaoFiadoParaDevedor.PENDENTE 
+            && pedido.getStatusPedido() != StatusPedido.PENDENTE) {
+                throw new PedidoNaoPodeSerConcluidoException("O pedido não pode ser concluído pois existe uma aprovação de fiado para cliente devedor pendente");
+            }
+
+        }
+
+    public boolean validarSeClienteEhInadiplente(Cliente cliente)  {
+        return pedidoRepository.existsByDataVencimentoBeforeAndStatusPedidoAndClienteId(LocalDate.now(), StatusPedido.PENDENTE, cliente.getId());
+    }
+
+    public BigDecimal gerarDescontoSolicitadoBaseadoClassificacaoCliente(PedidoCriarRequest novoPedido, Cliente cliente) {
+
+        if (novoPedido.descontoSolicitado().compareTo(new BigDecimal(0.1)) < 0)
+            return novoPedido.descontoSolicitado();
+
+        else
+            return cliente.getClassificacao() == ClienteClassificao.VIP ? novoPedido.descontoSolicitado() : new BigDecimal(0.1);
 
     }
 
