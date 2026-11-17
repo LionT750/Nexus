@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public record ItemPedidoListarAlugueisResponse(
     String nomeProduto,
     BigDecimal quantidade,
-    LocalDate dataVencimentoAluguel
+    LocalDate dataVencimentoAluguel,
+    LocalDate dataDevolucao
 )
 {}

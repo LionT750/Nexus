@@ -58,5 +58,9 @@ public class Produto {
         estoque -= quantidadeParaBaixar;
     }
 
+    public void reporEstoque(Long quantidadeParaRepor){
+        estoque += quantidadeParaRepor;
+    }
+
     
 }

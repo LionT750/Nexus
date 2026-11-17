@@ -48,6 +48,8 @@ public class ItemPedido {
 
     private LocalDate dataVencimentoAluguel;
 
+    private LocalDate dataDevolucao;
+
     public void calcularValorItem(){
         if (isAluguel == true)
             valorItem = produto.getPrecoAluguel().multiply(BigDecimal.valueOf(quantidade));

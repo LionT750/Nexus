@@ -8,13 +8,15 @@ import org.mapstruct.Mapping;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
+import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Pedido;
 
-@Mapper (componentModel = "spring", uses = {ColaboradorMapper.class, ClienteMapper.class})
+@Mapper (componentModel = "spring", uses = {ColaboradorMapper.class, ClienteMapper.class, ItemPedidoMapper.class})
 public interface PedidoMapper{
     
     @Mapping (target = "id", ignore = true)
@@ -52,5 +54,10 @@ public interface PedidoMapper{
 
     @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
     PedidoFinalizarResponse toFinalizarDTO(Pedido pedido);
+
+    @Mapping (source = "pedido.id", target = "id")
+    @Mapping (source = "pedido.cliente.cnpj", target = "cnpjCliente")
+    @Mapping (source = "alugueisDevolvidos", target = "alugueis")
+    PedidoDevolverResponse toDevolverDTO(Pedido pedido, List<ItemPedido> alugueisDevolvidos);
 }
 

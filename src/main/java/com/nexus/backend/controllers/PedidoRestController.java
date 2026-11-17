@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
@@ -79,6 +80,11 @@ public class PedidoRestController {
     @PutMapping("/{id}/finalizar")
     public PedidoFinalizarResponse finalizarPedido(@PathVariable Long id) {
         return pedidoService.finalizarPedido(id);
+    }
+
+    @PutMapping("/{id}/devolucao")
+    public PedidoDevolverResponse devolverAlugueis(@PathVariable Long id) {
+        return pedidoService.devolverAlugueis(id);
     }
     
     

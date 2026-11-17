@@ -19,6 +19,7 @@ import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
@@ -35,6 +36,7 @@ import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
 import com.nexus.backend.enums.StatusPedido;
 import com.nexus.backend.exceptions.AluguelMustHaveAdataVencimentoException;
+import com.nexus.backend.exceptions.AluguelNaoPodeSerDevolvidoException;
 import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
@@ -226,6 +228,31 @@ public class PedidoService {
 
         validarPedidoNumEstadoValido(pedido);
         return pedidoMapper.toFinalizarDTO(pedidoRepository.save(pedido));
+    }
+
+    @Transactional
+    public PedidoDevolverResponse devolverAlugueis(Long idPedido) {
+
+        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+
+        List<ItemPedido> alugueis = pedido.getItemsPedido().stream().filter(ItemPedido::isAluguel).toList();
+
+        if (alugueis.isEmpty())
+            throw new AluguelNaoPodeSerDevolvidoException("O pedido nao possui itens de aluguel para devolver");
+
+        List<ItemPedido> alugueisParaDevolver = alugueis.stream().filter(i -> i.getDataDevolucao() == null).toList();
+
+        if (alugueisParaDevolver.isEmpty())
+            throw new AluguelNaoPodeSerDevolvidoException("Os alugueis deste pedido ja foram devolvidos");
+
+        for (ItemPedido item : alugueisParaDevolver) {
+            item.getProduto().reporEstoque(item.getQuantidade());
+            item.setDataDevolucao(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+        }
+
+        validarPedidoNumEstadoValido(pedido);
+        pedidoRepository.save(pedido);
+        return pedidoMapper.toDevolverDTO(pedido, alugueisParaDevolver);
     }
 
     public PedidoDetailResponse buscarPedidoPorId(Long id) {
