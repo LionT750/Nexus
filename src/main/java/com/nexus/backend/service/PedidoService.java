@@ -152,6 +152,10 @@ public class PedidoService {
         return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatusPedido(LocalDate.now(), StatusPedido.PENDENTE));
     }
 
+    public List<PedidoListarResponse> listarPedidosRejeitados() {
+        return pedidoMapper.toListarDTO(pedidoRepository.findByStatusPedido(StatusPedido.REJEITADO));
+    }
+
     public List<PedidoListarResponse> listarPedidosDoCliente(PedidoPorClienteRequest pedidoPorClienteRequest) {
 
         Map<String, String> camposDeIdentificacao = new LinkedHashMap<>();

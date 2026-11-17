@@ -58,6 +58,12 @@ public class PedidoRestController {
     public List<PedidoListarResponse> listarPedidos() {
         return pedidoService.listar();
     }
+
+    @GetMapping("/rejeitados")
+    public List<PedidoListarResponse> listarPedidosRejeitados() {
+        return pedidoService.listarPedidosRejeitados();
+    }
+    
     
     @GetMapping("/vencidosEmAberto")
     public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {

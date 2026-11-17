@@ -17,6 +17,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long>{
 
     boolean existsByDataVencimentoBeforeAndStatusPedidoAndClienteId(LocalDate now, StatusPedido status, Long idCliente);
 
+    List<Pedido> findByStatusPedido(StatusPedido statusPedido);
+
     List<Pedido> findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido statusPedido, StatusAprovacaoDesconto statusAprovacaoDesconto);
 
     List<Pedido> findByStatusPedidoAndStatusAprovacaoFiadoParaDevedor(StatusPedido statusPedido, StatusAprovacaoFiadoParaDevedor statusAprovacaoDevedor);
