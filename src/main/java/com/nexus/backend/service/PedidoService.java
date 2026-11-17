@@ -215,6 +215,9 @@ public class PedidoService {
         pedido.setStatusAprovacaoFiadoParaDevedor(resolverSolicitacaoAprovacaoDevedorRequest.statusAprovacaoFiadoParaDevedor());
         pedido.setDataAtualizacaoAprovacaoFiado(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
 
+        if (pedido.getStatusAprovacaoFiadoParaDevedor() == StatusAprovacaoFiadoParaDevedor.REPROVADO)
+            pedido.setStatusPedido(StatusPedido.REJEITADO);
+
         validarPedidoNumEstadoValido(pedido);
         return pedidoMapper.toResolverDevedorDTO(pedidoRepository.save(pedido));
     }
