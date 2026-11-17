@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
@@ -48,5 +49,8 @@ public interface PedidoMapper{
     ResolverSolicitacaoDescontoResponse toResolverDescontoDTO(Pedido pedido);
 
     List<PedidoListarResponse> toListarDTO(List<Pedido> pedidos);
+
+    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
+    PedidoFinalizarResponse toFinalizarDTO(Pedido pedido);
 }
 

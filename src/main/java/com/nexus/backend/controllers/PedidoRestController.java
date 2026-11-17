@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
@@ -73,6 +74,11 @@ public class PedidoRestController {
     @PutMapping("/{id}/desconto")
     public ResolverSolicitacaoDescontoResponse resolverSolicitacaoDesconto(@PathVariable Long id, @Valid @RequestBody ResolverSolicitacaoDescontoRequest resolverSolicitacaoDescontoRequest) {
         return pedidoService.resolverSolicitacaoDesconto(id, resolverSolicitacaoDescontoRequest);
+    }
+
+    @PutMapping("/{id}/finalizar")
+    public PedidoFinalizarResponse finalizarPedido(@PathVariable Long id) {
+        return pedidoService.finalizarPedido(id);
     }
     
     

@@ -19,6 +19,7 @@ import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
+import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoRequest;
@@ -40,6 +41,7 @@ import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.DataVencimentoObrigatoriaException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
+import com.nexus.backend.exceptions.PedidoNaoPodeSerFinalizadoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
 import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
 import com.nexus.backend.mappers.PedidoMapper;
@@ -205,6 +207,25 @@ public class PedidoService {
 
         validarPedidoNumEstadoValido(pedido);
         return pedidoMapper.toResolverDescontoDTO(pedidoRepository.save(pedido));
+    }
+
+    @Transactional
+    public PedidoFinalizarResponse finalizarPedido(Long idPedido) {
+
+        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+
+        if (pedido.getStatusPedido() != StatusPedido.PENDENTE)
+            throw new PedidoNaoPodeSerFinalizadoException("O pedido nao pode ser finalizado pois nao esta pendente, status atual: " + pedido.getStatusPedido());
+
+        pedido.setStatusPedido(StatusPedido.PAGO);
+
+        if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO) {
+            Cliente cliente = pedido.getCliente();
+            cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().add(pedido.getValorTotal()));
+        }
+
+        validarPedidoNumEstadoValido(pedido);
+        return pedidoMapper.toFinalizarDTO(pedidoRepository.save(pedido));
     }
 
     public PedidoDetailResponse buscarPedidoPorId(Long id) {
