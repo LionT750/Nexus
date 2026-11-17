@@ -33,6 +33,7 @@ import com.nexus.backend.enums.ClienteClassificao;
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
 import com.nexus.backend.enums.StatusPedido;
+import com.nexus.backend.exceptions.AluguelMustHaveAdataVencimentoException;
 import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
@@ -234,6 +235,8 @@ public class PedidoService {
                 if (i.isAluguel() == true)
                 {
                     item.setAluguel(i.isAluguel());
+                    if (i.dataVencimentoAluguel() == null)
+                        throw new AluguelMustHaveAdataVencimentoException();
                     item.setDataVencimentoAluguel(i.dataVencimentoAluguel());
                 }
                 else
