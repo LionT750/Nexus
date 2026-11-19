@@ -21,8 +21,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long>{
 
     List<Pedido> findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido statusPedido, StatusAprovacaoDesconto statusAprovacaoDesconto);
 
-    List<Pedido> findByStatusPedidoAndStatusAprovacaoFiadoParaDevedor(StatusPedido statusPedido, StatusAprovacaoFiadoParaDevedor statusAprovacaoDevedor);
-
     List<Pedido> findByClienteCnpj(String cnpjCliente);
 
     List<Pedido> findByClienteId(Long id);

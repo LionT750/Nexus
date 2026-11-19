@@ -404,6 +404,10 @@ public class PedidoService {
             return itensPedidos;
     }
 
+
+    
+
+
     public void validarPedidoNumEstadoValido(Pedido pedido) {
         if (pedido.getStatusPedido() != StatusPedido.PENDENTE && pedido.getStatusAprovacaoDesconto() == (StatusAprovacaoDesconto.PENDENTE))
             throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois contem uma solicitacao de desconto pendente de autorizacao");
