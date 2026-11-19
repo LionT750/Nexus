@@ -8,6 +8,9 @@ import com.nexus.backend.dtos.ProdutoAdicionarEstoqueRequest;
 import com.nexus.backend.dtos.ProdutoAdicionarEstoqueResponse;
 import com.nexus.backend.dtos.ProdutoCriarRequest;
 import com.nexus.backend.dtos.ProdutoCriarResponse;
+import com.nexus.backend.dtos.ProdutoDeletarResponse;
+import com.nexus.backend.dtos.ProdutoEditarRequest;
+import com.nexus.backend.dtos.ProdutoEditarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
 import com.nexus.backend.service.ProdutoService;
 
@@ -20,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -50,6 +55,16 @@ public class ProdutoRestController {
     @PutMapping("/adicionarEstoque")
     public ProdutoAdicionarEstoqueResponse adicionarEstoque(@Valid @RequestBody ProdutoAdicionarEstoqueRequest produtoAdicionarEstoqueRequest) {
         return produtoService.adicionarEstoque(produtoAdicionarEstoqueRequest);
+    }
+
+    @PutMapping("/{id}/editar")
+    public ProdutoEditarResponse editar(@PathVariable Long id, @Valid @RequestBody ProdutoEditarRequest produtoEditarRequest) {
+        return produtoService.editar(id, produtoEditarRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public ProdutoDeletarResponse deletar(@PathVariable Long id) {
+        return produtoService.deletar(id);
     }
     
 }

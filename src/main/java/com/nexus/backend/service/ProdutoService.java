@@ -9,6 +9,9 @@ import com.nexus.backend.dtos.ProdutoAdicionarEstoqueRequest;
 import com.nexus.backend.dtos.ProdutoAdicionarEstoqueResponse;
 import com.nexus.backend.dtos.ProdutoCriarRequest;
 import com.nexus.backend.dtos.ProdutoCriarResponse;
+import com.nexus.backend.dtos.ProdutoDeletarResponse;
+import com.nexus.backend.dtos.ProdutoEditarRequest;
+import com.nexus.backend.dtos.ProdutoEditarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Produto;
@@ -55,6 +58,24 @@ public class ProdutoService {
     public List<ItemPedidoListarAlugueisResponse> listarAlugados() {
         List<ItemPedido> itensPedidosAluguel = itemPedidoRepository.findByisAluguelTrue();
         return itemPedidoMapper.toAluguelDTO(itensPedidosAluguel);
+    }
+
+    public ProdutoEditarResponse editar(Long idProduto, ProdutoEditarRequest dto) {
+        Produto produto = produtoRepository.findById(idProduto).orElseThrow(() -> new ProdutoNotFoundException(idProduto));
+
+        produtoMapper.editarEntity(dto, produto);
+        produtoRepository.save(produto);
+
+        return produtoMapper.toEditarDTO(produto);
+    }
+
+    @Transactional
+    public ProdutoDeletarResponse deletar(Long idProduto) {
+        Produto produto = produtoRepository.findById(idProduto).orElseThrow(() -> new ProdutoNotFoundException(idProduto));
+
+        produtoRepository.delete(produto);
+
+        return produtoMapper.toDeletarDTO(produto);
     }
   
 }
