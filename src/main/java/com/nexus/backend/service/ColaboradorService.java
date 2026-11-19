@@ -1,9 +1,10 @@
 package com.nexus.backend.service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.nexus.backend.dtos.ColaboradorCriarRequest;
 import com.nexus.backend.dtos.ColaboradorCriarResponse;
@@ -11,14 +12,17 @@ import com.nexus.backend.dtos.ColaboradorDeletarResponse;
 import com.nexus.backend.dtos.ColaboradorEditarRequest;
 import com.nexus.backend.dtos.ColaboradorEditarResponse;
 import com.nexus.backend.dtos.ColaboradorListarResponse;
+import com.nexus.backend.dtos.ColaboradorReativarResponse;
 import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.exceptions.ColaboradorAlreadyCadastradoException;
+import com.nexus.backend.exceptions.ColaboradorDesativadoException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.CpfJaCadastradoOutroColaboradorException;
 import com.nexus.backend.exceptions.EmailJaCadastradoOutroColaboradorException;
 import com.nexus.backend.mappers.ColaboradorMapper;
 import com.nexus.backend.repository.ColaboradorRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor 
@@ -29,9 +33,19 @@ public class ColaboradorService {
 
     public ColaboradorCriarResponse criar(ColaboradorCriarRequest novoColaborador) {
 
+        Optional<Colaborador> colaboradorDesativadoPorNome = colaboradorRepository.findDesativadoByName(novoColaborador.name());
+        if (colaboradorDesativadoPorNome.isPresent())
+            throw new ColaboradorDesativadoException(colaboradorDesativadoPorNome.get().getId());
+
+        Optional<Colaborador> colaboradorDesativadoPorEmail = colaboradorRepository.findDesativadoByEmail(novoColaborador.email());
+        if (colaboradorDesativadoPorEmail.isPresent())
+            throw new ColaboradorDesativadoException(colaboradorDesativadoPorEmail.get().getId());
+
         if (colaboradorRepository.existsByName(novoColaborador.name()))
             throw new ColaboradorAlreadyCadastradoException(novoColaborador.name());
 
+        if (colaboradorRepository.existsByEmail(novoColaborador.email()))
+            throw new EmailJaCadastradoOutroColaboradorException(novoColaborador.email());
 
         Colaborador colaborador = colaboradorMapper.toEntity(novoColaborador);
         Colaborador persistedColaborador = colaboradorRepository.save(colaborador);
@@ -47,10 +61,13 @@ public class ColaboradorService {
     public ColaboradorEditarResponse editar(Long idColaborador, ColaboradorEditarRequest dto) {
         Colaborador colaborador = colaboradorRepository.findById(idColaborador).orElseThrow(() -> new ColaboradorNotFoundException(idColaborador));
 
-        if (dto.cpf() != null && colaborador.getCpf() != dto.cpf() && colaboradorRepository.existsByCpf(dto.cpf()))
+        if (dto.name() != null && !Objects.equals(colaborador.getName(), dto.name()) && colaboradorRepository.existsByName(dto.name()))
+            throw new ColaboradorAlreadyCadastradoException(dto.name());
+
+        if (dto.cpf() != null && !Objects.equals(colaborador.getCpf(), dto.cpf()) && colaboradorRepository.existsByCpf(dto.cpf()))
             throw new CpfJaCadastradoOutroColaboradorException(dto.cpf());
 
-        if (dto.email() != null && colaborador.getEmail() != dto.email() && colaboradorRepository.existsByEmail(dto.email()))
+        if (dto.email() != null && !Objects.equals(colaborador.getEmail(), dto.email()) && colaboradorRepository.existsByEmail(dto.email()))
             throw new EmailJaCadastradoOutroColaboradorException(dto.email());
 
         colaboradorMapper.editarEntity(dto, colaborador);
@@ -67,6 +84,14 @@ public class ColaboradorService {
         
         return colaboradorMapper.toDeletarDTO(colaborador);
     }
+
+    @Transactional
+    public ColaboradorReativarResponse reativar(Long idColaborador) {
+        Colaborador colaborador = colaboradorRepository.findByIdIncludingDeleted(idColaborador).orElseThrow(() -> new ColaboradorNotFoundException(idColaborador));
+
+        colaboradorRepository.reativar(idColaborador);
+
+        return colaboradorMapper.toReativarDTO(colaborador);
+    }
   
 }
-

@@ -14,7 +14,6 @@ import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
-import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.entity.ItemPedido;
@@ -49,12 +48,6 @@ public interface PedidoMapper{
     SolicitacaoDescontoListarResponse toDescontoDTO(Pedido pedido);
 
     List<SolicitacaoDescontoListarResponse> toListarDescontoDTO(List<Pedido> pedidos);
-
-    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
-    @Mapping (target = "pedido", ignore = true)
-    SolicitacaoAprovacaoDevedorListarResponse toDevedorDTO(Pedido pedido);
-
-    List<SolicitacaoAprovacaoDevedorListarResponse> toListarDevedorDTO(List<Pedido> pedidos);
 
     @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
     @Mapping (source = "colaboradorDesconto.name", target = "nomeColaborador")

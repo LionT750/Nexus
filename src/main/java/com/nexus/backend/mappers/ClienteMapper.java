@@ -6,6 +6,7 @@ import com.nexus.backend.dtos.ClienteDeletarResponse;
 import com.nexus.backend.dtos.ClienteEditarRequest;
 import com.nexus.backend.dtos.ClienteEditarResponse;
 import com.nexus.backend.dtos.ClienteListarResponse;
+import com.nexus.backend.dtos.ClienteReativarResponse;
 import com.nexus.backend.entity.Cliente;
 
 import java.util.List;
@@ -31,4 +32,7 @@ public interface ClienteMapper {
 
     @Mapping (target = "excluido", constant = "true")
     ClienteDeletarResponse toDeletarDTO(Cliente cliente);
+
+    @Mapping (target = "excluido", constant = "false")
+    ClienteReativarResponse toReativarDTO(Cliente cliente);
 }

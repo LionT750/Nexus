@@ -6,6 +6,7 @@ import com.nexus.backend.dtos.ColaboradorDeletarResponse;
 import com.nexus.backend.dtos.ColaboradorEditarRequest;
 import com.nexus.backend.dtos.ColaboradorEditarResponse;
 import com.nexus.backend.dtos.ColaboradorListarResponse;
+import com.nexus.backend.dtos.ColaboradorReativarResponse;
 import com.nexus.backend.entity.Colaborador;
 
 import java.util.List;
@@ -34,5 +35,8 @@ public interface ColaboradorMapper {
     void editarEntity(ColaboradorEditarRequest dto, @MappingTarget Colaborador entity);
 
     @Mapping (target = "excluido", constant = "true")
-    ColaboradorDeletarResponse toDeletarDTO(Colaborador cliente);
+    ColaboradorDeletarResponse toDeletarDTO(Colaborador colaborador);
+
+    @Mapping (target = "excluido", constant = "false")
+    ColaboradorReativarResponse toReativarDTO(Colaborador colaborador);
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.hibernate.validator.constraints.br.CNPJ;
+
 import com.nexus.backend.enums.ModalidadePagamento;
 
 import jakarta.validation.Valid;
@@ -15,7 +17,7 @@ import jakarta.validation.constraints.NotNull;
  
 public record PedidoCriarRequest(
     String descricao,
-    @NotNull String CNPJcliente,
+    @CNPJ(format = CNPJ.Format.ALPHANUMERIC) @NotNull String CNPJcliente,
     @DecimalMax("0.15")
     @DecimalMin("0.0")
     @NotNull 

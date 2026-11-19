@@ -16,7 +16,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long>{
 
     boolean existsByDataVencimentoBeforeAndStatusPedidoAndClienteId(LocalDate now, StatusPedido status, Long idCliente);
 
-    List<Pedido> findByStatusPedido(StatusPedido statusPedido);
+    boolean existsByClienteIdAndStatusPedido(Long idCliente, StatusPedido statusPedido);
 
     List<Pedido> findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido statusPedido, StatusAprovacaoDesconto statusAprovacaoDesconto);
 
@@ -27,4 +27,3 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long>{
     List<Pedido> findByClienteEmail(String email);
     
 }
-

@@ -47,6 +47,7 @@ import com.nexus.backend.exceptions.DataVencimentoObrigatoriaException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoJaPagoNaoPodeSerModificadoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
+import com.nexus.backend.exceptions.PedidoNaoPodeSerDeletadoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerFinalizadoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
 import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
@@ -138,39 +139,87 @@ public class PedidoService {
     public PedidoDetailResponse editarPedido(Long idPedido, PedidoEditarRequest dto) {
            Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
 
-           if (pedido.getStatusPedido() == StatusPedido.PAGO)
+           if (pedido.getStatusPedido() != StatusPedido.PENDENTE)
             throw new PedidoJaPagoNaoPodeSerModificadoException();
 
-           pedido.setDescricao(
-             dto.descricao() == null ?
-             pedido.getDescricao() :
-             dto.descricao()
-           );
+           Cliente cliente = pedido.getCliente();
+           boolean eraAPrazo = pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO;
+           BigDecimal valorTotalAnterior = pedido.getValorTotal();
+           ModalidadePagamento modalidade = dto.modalidadePagamento() == null
+                   ? pedido.getModalidadePagamento()
+                   : dto.modalidadePagamento();
 
-           
-           if ((pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.APROVADO 
-           || pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE)
-           || pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.PENDENTE
-           && dto.descontoSolicitado().compareTo(pedido.getDescontoAutorizado()) > 0)
-           {
-              pedido.setDescontoSolicitado(dto.descontoSolicitado());
-              pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.PENDENTE);
-              pedido.setColaboradorDesconto(null);
+           if (dto.dataVencimento() != null)
+               pedido.setDataVencimento(dto.dataVencimento());
+
+           if (modalidade == ModalidadePagamento.A_PRAZO && pedido.getDataVencimento() == null)
+               throw new DataVencimentoObrigatoriaException();
+
+           if (modalidade == ModalidadePagamento.A_PRAZO && !eraAPrazo && validarSeClienteEhInadiplente(cliente))
+               throw new ClienteInadimplenteNaoPodeAbrirPrazoException();
+
+           if (dto.descricao() != null)
+               pedido.setDescricao(dto.descricao());
+
+           if (dto.itensPedido() != null) {
+               if (dto.itensPedido().isEmpty())
+                   throw new NoValidProdutosForThisPedidoException();
+
+               devolverEstoqueItens(pedido.getItemsPedido());
+
+               List<ItemPedido> novosItens = criarItemPedidos(dto, pedido);
+               pedido.getItemsPedido().clear();
+               pedido.getItemsPedido().addAll(novosItens);
            }
 
-           pedido.setModalidadePagamento(
-            dto.modalidadePagamento() == null ?
-            pedido.getModalidadePagamento() :
-            dto.modalidadePagamento()
-           );
+           pedido.setModalidadePagamento(modalidade);
 
-           if (dto.itensPedido() != null)
-           {
-            List<ItemPedido> itensPedidos = criarItemPedidos(dto, pedido);
+           if (dto.descontoSolicitado() != null) {
+               BigDecimal descontoSolicitado = gerarDescontoSolicitadoBaseadoClassificacaoCliente(dto.descontoSolicitado(), cliente);
+               pedido.setDescontoSolicitado(descontoSolicitado);
 
-            pedido.setItemsPedido(itensPedidos);
+               if (descontoSolicitado.compareTo(pedido.getDescontoAutorizado()) > 0) {
+                   if (cliente.getClassificacao() == ClienteClassificao.VIP
+                           && descontoSolicitado.compareTo(BigDecimal.valueOf(0.05)) <= 0
+                           && pedido.getStatusAprovacaoDesconto() != StatusAprovacaoDesconto.REPROVADO_INADIPLENCIA) {
+                       pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
+                       pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+                       pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
+                   }
+                   else if (pedido.getStatusAprovacaoDesconto() != StatusAprovacaoDesconto.REPROVADO_INADIPLENCIA) {
+                       pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.PENDENTE);
+                       pedido.setColaboradorDesconto(null);
+                   }
+               }
+
+               else if (descontoSolicitado.compareTo(pedido.getDescontoAutorizado()) <= 0
+                       && pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.PENDENTE) {
+                   pedido.setColaboradorDesconto(null);
+
+                   if (descontoSolicitado.compareTo(BigDecimal.ZERO) == 0 && cliente.getClassificacao() == ClienteClassificao.NORMAL)
+                       pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.NAO_SOLICITADO);
+
+                   else if (cliente.getClassificacao() == ClienteClassificao.VIP && descontoSolicitado.compareTo(BigDecimal.valueOf(0.05)) <= 0) {
+                       pedido.setDescontoAutorizado(BigDecimal.valueOf(0.05));
+                       pedido.setDataAtualizacaoDesconto(LocalDate.now(ZoneId.of("America/Sao_Paulo")));
+                       pedido.setStatusAprovacaoDesconto(StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE);
+                   }
+               }
            }
 
+           pedido.calcularEsetarValorTotal(pedido.getDescontoAutorizado());
+
+           if (eraAPrazo)
+               cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().add(valorTotalAnterior));
+
+           if (modalidade == ModalidadePagamento.A_PRAZO) {
+               if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+                   throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
+
+               cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().subtract(pedido.getValorTotal()));
+           }
+
+           validarPedidoNumEstadoValido(pedido);
            return pedidoMapper.toDetailDTO(pedidoRepository.save(pedido));
 
     }
@@ -182,10 +231,6 @@ public class PedidoService {
 
     public List<PedidoListarResponse> listarPedidosVencidosEmAberto() {
         return pedidoMapper.toListarDTO(pedidoRepository.findByDataVencimentoBeforeAndStatusPedido(LocalDate.now(), StatusPedido.PENDENTE));
-    }
-
-    public List<PedidoListarResponse> listarPedidosRejeitados() {
-        return pedidoMapper.toListarDTO(pedidoRepository.findByStatusPedido(StatusPedido.REJEITADO));
     }
 
     public List<PedidoListarResponse> listarPedidosDoCliente(PedidoPorClienteRequest pedidoPorClienteRequest) {
@@ -406,11 +451,28 @@ public class PedidoService {
     }
 
 
+    @Transactional
     public PedidoDeletarResponse deletar(Long idPedido) {
         Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+
+        if (pedido.getStatusPedido() != StatusPedido.PENDENTE)
+            throw new PedidoNaoPodeSerDeletadoException(idPedido, String.valueOf(pedido.getStatusPedido()));
+
+        devolverEstoqueItens(pedido.getItemsPedido());
+
+        if (pedido.getModalidadePagamento() == ModalidadePagamento.A_PRAZO)
+            pedido.getCliente().setLimiteDeCredito(pedido.getCliente().getLimiteDeCredito().add(pedido.getValorTotal()));
+
         pedidoRepository.delete(pedido);
 
         return pedidoMapper.toDeletarDTO(pedido);
+    }
+
+    private void devolverEstoqueItens(List<ItemPedido> itens) {
+        for (ItemPedido item : itens) {
+            if (!(item.isAluguel() && item.getDataDevolucao() != null))
+                item.getProduto().reporEstoque(item.getQuantidade());
+        }
     }
 
 
@@ -432,12 +494,16 @@ public class PedidoService {
     }
 
     public BigDecimal gerarDescontoSolicitadoBaseadoClassificacaoCliente(PedidoCriarRequest novoPedido, Cliente cliente) {
+        return gerarDescontoSolicitadoBaseadoClassificacaoCliente(novoPedido.descontoSolicitado(), cliente);
+    }
 
-        if (novoPedido.descontoSolicitado().compareTo(new BigDecimal(0.1)) < 0)
-            return novoPedido.descontoSolicitado();
+    public BigDecimal gerarDescontoSolicitadoBaseadoClassificacaoCliente(BigDecimal descontoSolicitado, Cliente cliente) {
+
+        if (descontoSolicitado.compareTo(new BigDecimal(0.1)) < 0)
+            return descontoSolicitado;
 
         else
-            return cliente.getClassificacao() == ClienteClassificao.VIP ? novoPedido.descontoSolicitado() : new BigDecimal(0.1);
+            return cliente.getClassificacao() == ClienteClassificao.VIP ? descontoSolicitado : new BigDecimal(0.1);
 
     }
 

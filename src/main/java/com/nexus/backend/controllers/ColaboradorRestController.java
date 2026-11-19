@@ -9,6 +9,7 @@ import com.nexus.backend.dtos.ColaboradorDeletarResponse;
 import com.nexus.backend.dtos.ColaboradorEditarRequest;
 import com.nexus.backend.dtos.ColaboradorEditarResponse;
 import com.nexus.backend.dtos.ColaboradorListarResponse;
+import com.nexus.backend.dtos.ColaboradorReativarResponse;
 import com.nexus.backend.service.ColaboradorService;
 
 import jakarta.validation.Valid;
@@ -52,6 +53,11 @@ public class ColaboradorRestController {
     @DeleteMapping("/{id}")
     public ColaboradorDeletarResponse deletar(@PathVariable Long id) {
         return colaboradorService.deletar(id);
+    }
+
+    @PutMapping("/{id}/reativar")
+    public ColaboradorReativarResponse reativar(@PathVariable Long id) {
+        return colaboradorService.reativar(id);
     }
 
 

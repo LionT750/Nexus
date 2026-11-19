@@ -3,11 +3,14 @@ package com.nexus.backend.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.hibernate.validator.constraints.br.CNPJ;
+
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
 import com.nexus.backend.dtos.PedidoDeletarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
+import com.nexus.backend.dtos.PedidoEditarRequest;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.PedidoPorClienteRequest;
@@ -17,6 +20,7 @@ import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
 import com.nexus.backend.service.PedidoService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -72,9 +76,14 @@ public class PedidoRestController {
 
 
     @GetMapping("/cliente")
-    public List<PedidoListarResponse> listarPedidosDoCliente(@Valid @RequestParam(required = false) Long idCliente,@Valid @RequestParam(required = false)  String emailCliente,@Valid @RequestParam(required = false)  String cnpjCliente) {
+    public List<PedidoListarResponse> listarPedidosDoCliente(@Valid @RequestParam(required = false) Long idCliente,@Valid @RequestParam(required = false) @Email String emailCliente,@Valid @RequestParam(required = false) @CNPJ(format = CNPJ.Format.ALPHANUMERIC) String cnpjCliente) {
         PedidoPorClienteRequest dto = new PedidoPorClienteRequest(idCliente, cnpjCliente, emailCliente);
         return pedidoService.listarPedidosDoCliente(dto);
+    }
+
+    @PutMapping("/{id}/editar")
+    public PedidoDetailResponse editarPedido(@PathVariable Long id, @Valid @RequestBody PedidoEditarRequest pedidoEditarRequest) {
+        return pedidoService.editarPedido(id, pedidoEditarRequest);
     }
 
     @PutMapping("/{id}/desconto")

@@ -15,7 +15,9 @@ import com.nexus.backend.dtos.ProdutoEditarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Produto;
+import com.nexus.backend.enums.StatusPedido;
 import com.nexus.backend.exceptions.ProdutoNotFoundException;
+import com.nexus.backend.exceptions.ProdutoPossuiPedidosEmAbertoException;
 import com.nexus.backend.exceptions.QuantidadeMinimaParaAdicionarException;
 import com.nexus.backend.mappers.ItemPedidoMapper;
 import com.nexus.backend.mappers.ProdutoMapper;
@@ -72,6 +74,10 @@ public class ProdutoService {
     @Transactional
     public ProdutoDeletarResponse deletar(Long idProduto) {
         Produto produto = produtoRepository.findById(idProduto).orElseThrow(() -> new ProdutoNotFoundException(idProduto));
+
+        if (itemPedidoRepository.existsByProdutoIdAndPedidoStatusPedido(idProduto, StatusPedido.PENDENTE)
+                || itemPedidoRepository.existsAluguelNaoDevolvidoByProdutoId(idProduto))
+            throw new ProdutoPossuiPedidosEmAbertoException(idProduto);
 
         produtoRepository.delete(produto);
 

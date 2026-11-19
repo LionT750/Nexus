@@ -84,7 +84,7 @@ public class Pedido {
     @ManyToOne 
     private Colaborador colaboradorDesconto;
 
-    @OneToMany (mappedBy = "pedido", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itemsPedido;
 
 

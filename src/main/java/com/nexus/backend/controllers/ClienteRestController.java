@@ -9,6 +9,7 @@ import com.nexus.backend.dtos.ClienteDeletarResponse;
 import com.nexus.backend.dtos.ClienteEditarRequest;
 import com.nexus.backend.dtos.ClienteEditarResponse;
 import com.nexus.backend.dtos.ClienteListarResponse;
+import com.nexus.backend.dtos.ClienteReativarResponse;
 import com.nexus.backend.service.ClienteService;
 
 import jakarta.validation.Valid;
@@ -52,6 +53,11 @@ public class ClienteRestController {
     @DeleteMapping("/{id}")
     public ClienteDeletarResponse deletar(@PathVariable Long id) {
         return clienteService.deletar(id);
+    }
+
+    @PutMapping("/{id}/reativar")
+    public ClienteReativarResponse reativar(@PathVariable Long id) {
+        return clienteService.reativar(id);
     }
     
 }
