@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.backend.dtos.ItemPedidoListarAlugueisResponse;
+import com.nexus.backend.dtos.ProdutoAdicionarEstoqueRequest;
+import com.nexus.backend.dtos.ProdutoAdicionarEstoqueResponse;
 import com.nexus.backend.dtos.ProdutoCriarRequest;
 import com.nexus.backend.dtos.ProdutoCriarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController 
@@ -41,6 +45,11 @@ public class ProdutoRestController {
     @GetMapping("/listarAlugados")
     public List<ItemPedidoListarAlugueisResponse> listarAlugados() {
         return produtoService.listarAlugados();
+    }
+
+    @PutMapping("/adicionarEstoque")
+    public ProdutoAdicionarEstoqueResponse adicionarEstoque(@Valid @RequestBody ProdutoAdicionarEstoqueRequest produtoAdicionarEstoqueRequest) {
+        return produtoService.adicionarEstoque(produtoAdicionarEstoqueRequest);
     }
     
 }

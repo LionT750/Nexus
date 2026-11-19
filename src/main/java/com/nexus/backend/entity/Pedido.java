@@ -9,7 +9,6 @@ import org.hibernate.annotations.SoftDelete;
 
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
-import com.nexus.backend.enums.StatusAprovacaoFiadoParaDevedor;
 import com.nexus.backend.enums.StatusPedido;
 
 import jakarta.persistence.CascadeType;
@@ -57,14 +56,13 @@ public class Pedido {
 
     private LocalDate dataAtualizacaoDesconto;
 
-    private LocalDate dataAtualizacaoAprovacaoFiado;
 
-    @DecimalMax("0.1")
+    @DecimalMax("0.15")
     @DecimalMin("0.0")
     @NotNull 
     private BigDecimal descontoAutorizado;
 
-    @DecimalMax("0.1")
+    @DecimalMax("0.15")
     @DecimalMin("0.0")
     @NotNull 
     private BigDecimal descontoSolicitado;
@@ -76,8 +74,6 @@ public class Pedido {
     @Enumerated (EnumType.STRING)
     private StatusAprovacaoDesconto statusAprovacaoDesconto;
 
-    @Enumerated (EnumType.STRING)
-    private StatusAprovacaoFiadoParaDevedor statusAprovacaoFiadoParaDevedor;
 
     @Enumerated (EnumType.STRING)
     private ModalidadePagamento modalidadePagamento;
@@ -87,9 +83,6 @@ public class Pedido {
 
     @ManyToOne 
     private Colaborador colaboradorDesconto;
-
-    @ManyToOne 
-    private Colaborador colaboradorAprovacaoFiado;
 
     @OneToMany (mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itemsPedido;

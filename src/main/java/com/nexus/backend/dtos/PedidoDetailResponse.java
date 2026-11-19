@@ -27,9 +27,7 @@ public record PedidoDetailResponse(
 
     ClienteCriarResponse cliente,
 
-    ColaboradorCriarResponse colaboradorDesconto,
-
-    ColaboradorCriarResponse colaboradorAprovacaoFiado
+    ColaboradorCriarResponse colaboradorDesconto
 
 ) {
     

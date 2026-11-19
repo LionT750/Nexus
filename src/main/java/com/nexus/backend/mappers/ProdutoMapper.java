@@ -5,6 +5,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.nexus.backend.dtos.ProdutoAdicionarEstoqueResponse;
 import com.nexus.backend.dtos.ProdutoCriarRequest;
 import com.nexus.backend.dtos.ProdutoCriarResponse;
 import com.nexus.backend.dtos.ProdutoListarResponse;
@@ -18,6 +19,10 @@ public interface ProdutoMapper {
     Produto toEntity(ProdutoCriarRequest dto);
     
     ProdutoCriarResponse toDTO(Produto  produto);
+
+    @Mapping(source = "produto.id", target = "idProduto")
+    @Mapping(source = "produto.nome", target = "nomeProduto")
+    ProdutoAdicionarEstoqueResponse toEstoqueDTO(Produto produto);
 
     ProdutoListarResponse toListarDTO(Produto produto);
     

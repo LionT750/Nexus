@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.backend.dtos.ColaboradorCriarRequest;
 import com.nexus.backend.dtos.ColaboradorCriarResponse;
+import com.nexus.backend.dtos.ColaboradorDeletarResponse;
+import com.nexus.backend.dtos.ColaboradorEditarRequest;
+import com.nexus.backend.dtos.ColaboradorEditarResponse;
 import com.nexus.backend.dtos.ColaboradorListarResponse;
 import com.nexus.backend.service.ColaboradorService;
 
@@ -17,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController 
@@ -37,7 +44,15 @@ public class ColaboradorRestController {
         return colaboradorService.listar();
     }
     
-    
+    @PutMapping("/{id}/editar")
+    public ColaboradorEditarResponse editar(@PathVariable Long id, @Valid @RequestBody ColaboradorEditarRequest colaboradorEditarRequest) {
+        return colaboradorService.editar(id, colaboradorEditarRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public ColaboradorDeletarResponse deletar(@PathVariable Long id) {
+        return colaboradorService.deletar(id);
+    }
 
 
 }

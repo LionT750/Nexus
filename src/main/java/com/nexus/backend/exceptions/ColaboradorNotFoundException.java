@@ -9,5 +9,10 @@ public class ColaboradorNotFoundException extends ErrorResponseException {
         super(HttpStatus.NOT_FOUND);
         setDetail("A operação não foi executada pois colaborador informado: " + nomeColaborador + " na venda não existe");
     }
+
+    public ColaboradorNotFoundException(Long id) {
+        super(HttpStatus.NOT_FOUND);
+        setDetail("A operação não foi executada pois colaborador com id informado: " + id + " não existe");
+    }
 }
 

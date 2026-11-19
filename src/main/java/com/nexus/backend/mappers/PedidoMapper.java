@@ -11,7 +11,6 @@ import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
 import com.nexus.backend.dtos.PedidoListarResponse;
-import com.nexus.backend.dtos.ResolverSolicitacaoAprovacaoDevedorResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
@@ -26,14 +25,11 @@ public interface PedidoMapper{
     @Mapping (target = "statusPedido", ignore = true)
     @Mapping (target = "cliente", ignore = true)
     @Mapping (target = "colaboradorDesconto", ignore = true)
-    @Mapping (target = "colaboradorAprovacaoFiado", ignore = true)
     @Mapping (target = "itemsPedido", ignore = true)
     @Mapping( target = "valorTotal", ignore = true)
     @Mapping (target = "dataAtualizacaoDesconto", ignore = true)
     @Mapping (target = "descontoAutorizado", ignore = true)
     @Mapping (target = "statusAprovacaoDesconto", ignore = true)
-    @Mapping (target = "dataAtualizacaoAprovacaoFiado", ignore = true)
-    @Mapping( target = "statusAprovacaoFiadoParaDevedor", ignore = true)
     Pedido toEntity(PedidoCriarRequest dto);
     
     @Mapping (source = "id", target = "codigoPedido")
@@ -60,10 +56,6 @@ public interface PedidoMapper{
     @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
     @Mapping (source = "colaboradorDesconto.name", target = "nomeColaborador")
     ResolverSolicitacaoDescontoResponse toResolverDescontoDTO(Pedido pedido);
-
-    @Mapping (source = "cliente.cnpj", target = "cnpjCliente")
-    @Mapping (source = "colaboradorDesconto.name", target = "nomeColaborador")
-    ResolverSolicitacaoAprovacaoDevedorResponse toResolverDevedorDTO(Pedido pedido);
 
     List<PedidoListarResponse> toListarDTO(List<Pedido> pedidos);
 

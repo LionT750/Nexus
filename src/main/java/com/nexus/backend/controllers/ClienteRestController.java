@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.backend.dtos.ClienteCriarRequest;
 import com.nexus.backend.dtos.ClienteCriarResponse;
+import com.nexus.backend.dtos.ClienteDeletarResponse;
+import com.nexus.backend.dtos.ClienteEditarRequest;
+import com.nexus.backend.dtos.ClienteEditarResponse;
 import com.nexus.backend.dtos.ClienteListarResponse;
 import com.nexus.backend.service.ClienteService;
 
@@ -17,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController 
@@ -36,8 +43,15 @@ public class ClienteRestController {
     public List<ClienteListarResponse> listarClientes() {
         return clienteService.listar();
     }
-    
-    
 
+    @PutMapping("/{id}/editar")
+    public ClienteEditarResponse editar(@PathVariable Long id, @Valid @RequestBody ClienteEditarRequest clienteEditarRequest) {
+        return clienteService.editar(id, clienteEditarRequest);
+    }
 
+    @DeleteMapping("/{id}")
+    public ClienteDeletarResponse deletar(@PathVariable Long id) {
+        return clienteService.deletar(id);
+    }
+    
 }
