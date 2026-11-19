@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDeletarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoEditarRequest;
@@ -405,7 +406,14 @@ public class PedidoService {
     }
 
 
-    
+    public PedidoDeletarResponse deletar(Long idPedido) {
+        Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
+        pedidoRepository.delete(pedido);
+
+        return pedidoMapper.toDeletarDTO(pedido);
+    }
+
+
 
 
     public void validarPedidoNumEstadoValido(Pedido pedido) {

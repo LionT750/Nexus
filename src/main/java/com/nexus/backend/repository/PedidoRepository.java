@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.nexus.backend.entity.Pedido;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
-import com.nexus.backend.enums.StatusAprovacaoFiadoParaDevedor;
 import com.nexus.backend.enums.StatusPedido;
 
 

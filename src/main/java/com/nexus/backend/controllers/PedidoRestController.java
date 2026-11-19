@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDeletarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,7 +92,10 @@ public class PedidoRestController {
         return pedidoService.devolverAlugueis(id);
     }
     
-    
+    @DeleteMapping("/{id}")
+    public PedidoDeletarResponse deletar(@PathVariable Long id) {
+        return pedidoService.deletar(id);
+    }
     
 
 

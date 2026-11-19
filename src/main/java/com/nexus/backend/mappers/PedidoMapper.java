@@ -5,8 +5,10 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.nexus.backend.dtos.ColaboradorDeletarResponse;
 import com.nexus.backend.dtos.PedidoCriarRequest;
 import com.nexus.backend.dtos.PedidoCriarResponse;
+import com.nexus.backend.dtos.PedidoDeletarResponse;
 import com.nexus.backend.dtos.PedidoDetailResponse;
 import com.nexus.backend.dtos.PedidoDevolverResponse;
 import com.nexus.backend.dtos.PedidoFinalizarResponse;
@@ -14,6 +16,7 @@ import com.nexus.backend.dtos.PedidoListarResponse;
 import com.nexus.backend.dtos.ResolverSolicitacaoDescontoResponse;
 import com.nexus.backend.dtos.SolicitacaoAprovacaoDevedorListarResponse;
 import com.nexus.backend.dtos.SolicitacaoDescontoListarResponse;
+import com.nexus.backend.entity.Colaborador;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Pedido;
 
@@ -66,5 +69,8 @@ public interface PedidoMapper{
     @Mapping (source = "pedido.cliente.cnpj", target = "cnpjCliente")
     @Mapping (source = "alugueisDevolvidos", target = "alugueis")
     PedidoDevolverResponse toDevolverDTO(Pedido pedido, List<ItemPedido> alugueisDevolvidos);
+
+    @Mapping (target = "excluido", constant = "true")
+    PedidoDeletarResponse toDeletarDTO(Pedido pedido);
 }
 
