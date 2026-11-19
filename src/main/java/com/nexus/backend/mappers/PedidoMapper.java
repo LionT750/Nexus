@@ -38,6 +38,7 @@ public interface PedidoMapper{
     @Mapping (source = "cliente.name", target = "nomeCliente")
     PedidoCriarResponse toDTO(Pedido  pedido);
 
+    @Mapping (source = "itemsPedido", target = "itensPedido")
     PedidoDetailResponse toDetailDTO(Pedido pedido);
     
     @Mapping (source = "id", target = "codigoPedido")

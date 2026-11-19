@@ -2,6 +2,7 @@ package com.nexus.backend.dtos;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import com.nexus.backend.enums.ModalidadePagamento;
 import com.nexus.backend.enums.StatusAprovacaoDesconto;
@@ -15,6 +16,10 @@ public record PedidoDetailResponse(
 
     BigDecimal valorTotal,
 
+    BigDecimal descontoSolicitado,
+
+    BigDecimal descontoAutorizado,
+
     LocalDate dataCriacao,
 
     LocalDate dataVencimento,
@@ -27,7 +32,9 @@ public record PedidoDetailResponse(
 
     ClienteCriarResponse cliente,
 
-    ColaboradorCriarResponse colaboradorDesconto
+    ColaboradorCriarResponse colaboradorDesconto,
+
+    List<ItemPedidoDetailResponse> itensPedido
 
 ) {
     

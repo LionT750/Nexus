@@ -16,6 +16,7 @@ import com.nexus.backend.dtos.ProdutoListarResponse;
 import com.nexus.backend.entity.ItemPedido;
 import com.nexus.backend.entity.Produto;
 import com.nexus.backend.enums.StatusPedido;
+import com.nexus.backend.enums.StatusProduto;
 import com.nexus.backend.exceptions.ProdutoNotFoundException;
 import com.nexus.backend.exceptions.ProdutoPossuiPedidosEmAbertoException;
 import com.nexus.backend.exceptions.QuantidadeMinimaParaAdicionarException;
@@ -38,6 +39,8 @@ public class ProdutoService {
 
     public ProdutoCriarResponse criar(ProdutoCriarRequest novoProduto) {
         Produto Produto = produtoMapper.toEntity(novoProduto);
+        if (Produto.getStatusProduto() == null)
+            Produto.setStatusProduto(StatusProduto.DISPONIVEL);
         Produto persistedProduto = produtoRepository.save(Produto);
         return produtoMapper.toDTO(persistedProduto);
         

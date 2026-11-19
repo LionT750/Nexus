@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 
 import com.nexus.backend.dtos.ItemPedidoCriarRequest;
 import com.nexus.backend.dtos.ItemPedidoCriarResponse;
+import com.nexus.backend.dtos.ItemPedidoDetailResponse;
 import com.nexus.backend.dtos.ItemPedidoListarAlugueisResponse;
 import com.nexus.backend.dtos.ItemPedidoListarResponse;
 import com.nexus.backend.entity.ItemPedido;
@@ -30,6 +31,13 @@ import com.nexus.backend.entity.ItemPedido;
     ItemPedidoListarResponse toListarDTO(ItemPedido itemPedido);
 
     List<ItemPedidoListarResponse> toDTO(List<ItemPedido > Itenspedido);
+
+    @Mapping (source = "produto.id", target = "codigoIdProduto")
+    @Mapping (source = "produto.nome", target = "nomeProduto")
+    @Mapping (source = "aluguel", target = "isAluguel")
+    ItemPedidoDetailResponse toDetailDTO(ItemPedido itemPedido);
+
+    List<ItemPedidoDetailResponse> toDetailDTO(List<ItemPedido> itensPedido);
 
     @Mapping (source = "produto.nome", target = "nomeProduto")
     ItemPedidoListarAlugueisResponse toAluguelDTO(ItemPedido itemPedido);
