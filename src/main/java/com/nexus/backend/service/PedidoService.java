@@ -158,6 +158,9 @@ public class PedidoService {
            if (modalidade == ModalidadePagamento.A_PRAZO && !eraAPrazo && validarSeClienteEhInadiplente(cliente))
                throw new ClienteInadimplenteNaoPodeAbrirPrazoException();
 
+           if (modalidade == ModalidadePagamento.A_VISTA && eraAPrazo)
+               pedido.setDataVencimento(null);
+
            if (dto.descricao() != null)
                pedido.setDescricao(dto.descricao());
 
