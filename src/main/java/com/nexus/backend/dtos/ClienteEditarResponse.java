@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 
 import com.nexus.backend.enums.ClienteClassificao;
 
-
-
 public record ClienteEditarResponse(
     String name,
     String telefone,

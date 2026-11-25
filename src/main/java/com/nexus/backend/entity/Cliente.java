@@ -49,7 +49,6 @@ public class Cliente {
     @Email
     private String email;
 
-    @Min(0)
     private BigDecimal limiteDeCredito;
 
     @Enumerated(EnumType.STRING)

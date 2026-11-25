@@ -50,6 +50,7 @@ import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerDeletadoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerFinalizadoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
+import com.nexus.backend.exceptions.PedidoRejeitadoPorFaltaDeLimiteDeCreditoException;
 import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
@@ -118,7 +119,7 @@ public class PedidoService {
                 if (pedido.getDataVencimento() == null)
                     throw new DataVencimentoObrigatoriaException();
 
-                if (pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+                if ((pedido.getValorTotal().multiply(BigDecimal.valueOf(1.0).subtract(pedido.getDescontoSolicitado())).compareTo(cliente.getLimiteDeCredito()) > 0))
                     throw new ClienteNaoPossuiLimiteSuficienteException(cliente.getLimiteDeCredito().toString());
 
 
@@ -279,7 +280,7 @@ public class PedidoService {
         return pedidoMapper.toListarDescontoDTO(pedidoRepository.findByStatusPedidoAndStatusAprovacaoDesconto(StatusPedido.PENDENTE, StatusAprovacaoDesconto.PENDENTE)); 
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = PedidoRejeitadoPorFaltaDeLimiteDeCreditoException.class)
     public ResolverSolicitacaoDescontoResponse resolverSolicitacaoDesconto(Long idPedido, ResolverSolicitacaoDescontoRequest resolverSolicitacaoDescontoRequest) {
 
         Pedido pedido = pedidoRepository.findById(idPedido).orElseThrow(() -> new PedidoNotFoundException(idPedido));
@@ -479,6 +480,9 @@ public class PedidoService {
 
 
     public void validarPedidoNumEstadoValido(Pedido pedido) {
+
+        Cliente cliente = clienteRepository.findById(pedido.getCliente().getId()).orElseThrow(() -> new ClienteNotFoundException(pedido.getCliente().getId()));
+
         if (pedido.getStatusPedido() != StatusPedido.PENDENTE && pedido.getStatusAprovacaoDesconto() == (StatusAprovacaoDesconto.PENDENTE))
             throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois contem uma solicitacao de desconto pendente de autorizacao");
 
@@ -486,6 +490,16 @@ public class PedidoService {
         || pedido.getStatusAprovacaoDesconto() == StatusAprovacaoDesconto.REPROVADO) 
         && pedido.getColaboradorDesconto() == null)
             throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois o desconto aprovado/reprovado nao possui um colaborador especificado");
+
+
+        if ((pedido.getStatusAprovacaoDesconto() != StatusAprovacaoDesconto.APROVADO_AUTOMATICAMENTE && pedido.getStatusAprovacaoDesconto() != StatusAprovacaoDesconto.PENDENTE) &&
+            pedido.getValorTotal().compareTo(cliente.getLimiteDeCredito()) > 0)
+        {
+            pedido.setStatusPedido(StatusPedido.REJEITADO);
+            cliente.setLimiteDeCredito(cliente.getLimiteDeCredito().add(pedido.getValorTotal()));
+            throw new PedidoRejeitadoPorFaltaDeLimiteDeCreditoException();
+        }
+
 
 }
 
