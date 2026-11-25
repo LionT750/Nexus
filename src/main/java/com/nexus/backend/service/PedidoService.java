@@ -1,6 +1,7 @@
 package com.nexus.backend.service;
 
 import java.math.BigDecimal;
+import java.text.Bidi;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import com.nexus.backend.exceptions.ClienteNaoPossuiLimiteSuficienteException;
 import com.nexus.backend.exceptions.ClienteNotFoundException;
 import com.nexus.backend.exceptions.ColaboradorNotFoundException;
 import com.nexus.backend.exceptions.DataVencimentoObrigatoriaException;
+import com.nexus.backend.exceptions.DescontoSolicitadoNaoSuportadoException;
 import com.nexus.backend.exceptions.NoValidProdutosForThisPedidoException;
 import com.nexus.backend.exceptions.PedidoJaPagoNaoPodeSerModificadoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerConcluidoException;
@@ -482,6 +484,16 @@ public class PedidoService {
     public void validarPedidoNumEstadoValido(Pedido pedido) {
 
         Cliente cliente = clienteRepository.findById(pedido.getCliente().getId()).orElseThrow(() -> new ClienteNotFoundException(pedido.getCliente().getId()));
+
+
+        //Aqui validamos se o desconto solicitado foi um valor válido exato. Ou 0, ou 5%, ou 10%, ou 15%
+        if (!(pedido.getDescontoSolicitado().compareTo(BigDecimal.ZERO) == 0 ||
+            pedido.getDescontoSolicitado().compareTo(BigDecimal.valueOf(0.05)) == 0 ||
+            pedido.getDescontoSolicitado().compareTo(BigDecimal.valueOf(0.1)) == 0 ||
+            pedido.getDescontoSolicitado().compareTo(BigDecimal.valueOf(0.15)) == 0))
+            throw new DescontoSolicitadoNaoSuportadoException(pedido.getDescontoSolicitado().toString());
+
+
 
         if (pedido.getStatusPedido() != StatusPedido.PENDENTE && pedido.getStatusAprovacaoDesconto() == (StatusAprovacaoDesconto.PENDENTE))
             throw new PedidoNaoPodeSerConcluidoException("O pedido nao pode ser concluido pois contem uma solicitacao de desconto pendente de autorizacao");
