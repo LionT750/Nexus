@@ -33,8 +33,7 @@ public class PedidoServiceTests {
     @Test
     void editarPedidoMustThrowWhenPedidoDoesntExist() {
 
-        PedidoEditarRequest fixturePedidoEditar = new PedidoEditarRequest("Nova descrição", 
-        null, 
+        PedidoEditarRequest fixturePedidoEditar = new PedidoEditarRequest("Nova descrição",  
         null, 
         null, 
         null);
@@ -49,7 +48,6 @@ public class PedidoServiceTests {
     void editarPedidoShouldBlockWhenStatusIsntPendente() {
 
         PedidoEditarRequest fixturePedidoEditar = new PedidoEditarRequest("Nova descrição", 
-        null, 
         null, 
         null, 
         null);
@@ -75,9 +73,9 @@ public class PedidoServiceTests {
     void editarPedidoToPrazoMustThrowWhenNoDataVencimentoIsGiven() {
        
         PedidoEditarRequest fixturePedidoEditar = new PedidoEditarRequest("Nova descrição", 
+        
         null, 
         ModalidadePagamento.A_PRAZO, 
-        null, 
         null);
 
         Pedido pedidoFixture = new Pedido(

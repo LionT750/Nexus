@@ -1,7 +1,6 @@
 package com.nexus.backend.service;
 
 import java.math.BigDecimal;
-import java.text.Bidi;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -53,6 +52,7 @@ import com.nexus.backend.exceptions.PedidoNaoPodeSerDeletadoException;
 import com.nexus.backend.exceptions.PedidoNaoPodeSerFinalizadoException;
 import com.nexus.backend.exceptions.PedidoNotFoundException;
 import com.nexus.backend.exceptions.PedidoRejeitadoPorFaltaDeLimiteDeCreditoException;
+import com.nexus.backend.exceptions.PedidoVencidoNaoPodeSerDeletadoException;
 import com.nexus.backend.exceptions.SolicitacaoDescontoNaoPodeSerResolvidaException;
 import com.nexus.backend.mappers.PedidoMapper;
 import com.nexus.backend.repository.ClienteRepository;
@@ -151,9 +151,6 @@ public class PedidoService {
            ModalidadePagamento modalidade = dto.modalidadePagamento() == null
                    ? pedido.getModalidadePagamento()
                    : dto.modalidadePagamento();
-
-           if (dto.dataVencimento() != null)
-               pedido.setDataVencimento(dto.dataVencimento());
 
            if (modalidade == ModalidadePagamento.A_PRAZO && pedido.getDataVencimento() == null)
                throw new DataVencimentoObrigatoriaException();
@@ -460,6 +457,9 @@ public class PedidoService {
 
         if (pedido.getStatusPedido() != StatusPedido.PENDENTE)
             throw new PedidoNaoPodeSerDeletadoException(idPedido, String.valueOf(pedido.getStatusPedido()));
+
+        if (LocalDate.now().isAfter(pedido.getDataVencimento()))
+            throw new PedidoVencidoNaoPodeSerDeletadoException();
 
         devolverEstoqueItens(pedido.getItemsPedido());
 
